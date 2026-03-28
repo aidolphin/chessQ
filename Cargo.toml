@@ -1,0 +1,26 @@
+
+[package]
+name = "chessQ"
+version = "0.1.0"
+edition = "2021"
+default-run = "chessQ"
+
+[lib]
+name = "chess_q"
+
+[[bin]]
+name = "chessQ"
+path = "src/main.rs"
+
+[dependencies]
+ratatui = "0.26"
+crossterm = "0.27"
+rand = "0.8"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "move_gen_beanch"
+harness = false
+path = "beanches/move_gen_beanch.rs"

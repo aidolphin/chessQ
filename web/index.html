@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChessQ - Free Rust Powered Online Chess Game</title>
+    <meta
+      name="description"
+      content="ChessQ is a free online chess game with Rust-powered move validation, timed matches, bot games, player profiles, and shareable invite links."
+    />
+    <meta
+      name="keywords"
+      content="free chess game, online chess, Rust chess engine, chess bot, browser chess, timed chess, chess profile"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="ChessQ - Free Rust Powered Online Chess Game" />
+    <meta
+      property="og:description"
+      content="Play free chess in the browser with Rust handling rules, clocks, bot matches, and game state."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://127.0.0.1:4173/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ChessQ - Free Rust Powered Online Chess Game" />
+    <meta
+      name="twitter:description"
+      content="Play free chess in the browser with Rust handling rules, clocks, bot matches, and game state."
+    />
+    <link rel="canonical" href="http://127.0.0.1:4173/" />
+    <link rel="stylesheet" href="./landing.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "ChessQ",
+        "applicationCategory": "Game",
+        "genre": ["Chess", "Strategy", "Board Game"],
+        "operatingSystem": "Web Browser",
+        "description": "ChessQ is a free browser chess product with Rust-powered move validation, clocks, bot matches, player profiles, and shareable match links.",
+        "url": "http://127.0.0.1:4173/"
+      }
+    </script>
+  </head>
+  <body>
+    <div class="landing-shell">
+      <header class="landing-hero">
+        <nav class="topbar">
+          <a class="brand" href="/">ChessQ</a>
+          <div class="topbar-links">
+            <a href="#features">Features</a>
+            <a href="#why">Why ChessQ</a>
+            <a class="play-link" href="/play.html">Play Now</a>
+          </div>
+        </nav>
+
+        <section class="hero-grid">
+          <div>
+            <p class="eyebrow">Free Online Chess Game</p>
+            <h1>Play modern chess in the browser with Rust as the engine.</h1>
+            <p class="hero-copy">
+              ChessQ is built for fast matches, clean profiles, timed games, bot play,
+              and shareable links. The frontend feels simple, while the Rust backend
+              keeps the rules honest.
+            </p>
+            <div class="hero-actions">
+              <a class="primary-link" href="/play.html">Start Playing</a>
+              <a class="secondary-link" href="/play.html?mode=bot&black=ChessQ%20AI&time=5&ai=aggressive">Play vs Bot</a>
+            </div>
+          </div>
+
+          <div class="hero-card">
+            <h2>What you get</h2>
+            <ul>
+              <li>Rust-powered chess rules and move validation</li>
+              <li>Timed matches with visible player clocks</li>
+              <li>Bot games with backend AI</li>
+              <li>Shareable play links and local match profiles</li>
+              <li>Move history, FEN tools, and saved local results</li>
+            </ul>
+          </div>
+        </section>
+      </header>
+
+      <main class="landing-main">
+        <section class="feature-section" id="features">
+          <div class="section-head">
+            <p class="eyebrow">Features</p>
+            <h2>Built like a product, not a demo board.</h2>
+          </div>
+          <div class="feature-grid">
+            <article class="feature-card">
+              <h3>SEO Landing + Game Page</h3>
+              <p>
+                The root page is a proper landing page for discovery and messaging,
+                while the game lives inside a dedicated play experience.
+              </p>
+            </article>
+            <article class="feature-card">
+              <h3>Rust Game Logic</h3>
+              <p>
+                Legal moves, check, checkmate, en passant, promotion, and timed flow
+                are powered by the Rust backend.
+              </p>
+            </article>
+            <article class="feature-card">
+              <h3>Profiles + Match History</h3>
+              <p>
+                Players can set small local profiles, reuse them, and keep a visible
+                record of previous games on the same device.
+              </p>
+            </article>
+            <article class="feature-card">
+              <h3>Bot and Invite Links</h3>
+              <p>
+                Challenge the AI or share the current match configuration and position
+                through a generated browser link.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="why-section" id="why">
+          <div class="section-head">
+            <p class="eyebrow">Why ChessQ</p>
+            <h2>Designed for a better free chess experience.</h2>
+          </div>
+          <div class="why-grid">
+            <div class="why-card">
+              <h3>Fast to understand</h3>
+              <p>
+                Clear onboarding, clear timers, clear board, and a setup flow that lets
+                players choose how they want to play before the first move.
+              </p>
+            </div>
+            <div class="why-card">
+              <h3>Honest architecture</h3>
+              <p>
+                The frontend handles presentation. Rust handles chess logic. That keeps
+                the app easier to trust, test, and extend.
+              </p>
+            </div>
+            <div class="why-card">
+              <h3>Room to grow</h3>
+              <p>
+                The current product supports local play, bot play, and shareable setup
+                links, with a foundation ready for real multiplayer and auth later.
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+<footer class="landing-footer">
+        <p>The High-Performance Open-Source Chess Engine Built with Rust | Engineered by Quantum Leaf Automation</p>
+        <p>
+          ChesseQ is a modern, memory-safe chess engine designed for speed and tactical depth. By leveraging Magic Bitboards and a Functional State architecture, ChesseQ provides a rock-solid foundation for both TUI-based terminal play and WebAssembly-powered browser experiences.
+        </p>
+        <p>Developed by Quantum Leaf Automation | Open Source</p>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChessQ Play</title>
+    <meta
+      name="description"
+      content="Play ChessQ online in the browser with Rust powering the chess rules, clocks, bot matches, profiles, and game state."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div>
+
+        </div>
+        <div class="status-pill">
+          <span class="status-label">Mode</span>
+          <strong data-mode-label>Local Match</strong>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="board-panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Board</p>
+              <h2>Match Arena</h2>
+            </div>
+            <div class="actions">
+              <button type="button" data-action="new">New Game</button>
+              <button type="button" data-action="share">Share Link</button>
+              <button type="button" data-action="undo">Undo</button>
+              <button type="button" data-action="flip">Flip Board</button>
+            </div>
+          </div>
+
+          <div class="player-strip">
+            <article class="player-card" data-player-card="b">
+              <div class="player-meta">
+                <div class="player-avatar" data-player-avatar="b">B</div>
+                <div>
+                  <p class="player-role" data-player-role="b">Black</p>
+                  <h3 class="player-name" data-player-name="b">Black</h3>
+                </div>
+              </div>
+              <div class="player-clock" data-player-clock="b">05:00</div>
+            </article>
+
+            <article class="player-card" data-player-card="w">
+              <div class="player-meta">
+                <div class="player-avatar" data-player-avatar="w">W</div>
+                <div>
+                  <p class="player-role" data-player-role="w">White</p>
+                  <h3 class="player-name" data-player-name="w">White</h3>
+                </div>
+              </div>
+              <div class="player-clock" data-player-clock="w">05:00</div>
+            </article>
+          </div>
+
+          <div class="board-frame">
+            <div class="board-banner" data-banner hidden></div>
+            <div class="board-mini-clock board-mini-clock-top" data-board-clock="b">05:00</div>
+            <div class="board-mini-clock board-mini-clock-bottom" data-board-clock="w">05:00</div>
+            <div class="board" data-board></div>
+          </div>
+        </section>
+
+        <aside class="sidebar">
+          <section class="card">
+            <p class="panel-kicker">Game State</p>
+            <h2>Live Status</h2>
+            <p class="status-text" data-status>White to move.</p>
+          </section>
+
+          <section class="card">
+            <p class="panel-kicker">Profiles</p>
+            <h2>Current Match</h2>
+            <div class="profile-summary">
+              <div>
+                <p class="summary-label">White</p>
+                <p class="summary-value" data-summary-white>White</p>
+              </div>
+              <div>
+                <p class="summary-label">Black</p>
+                <p class="summary-value" data-summary-black>Black</p>
+              </div>
+              <div>
+                <p class="summary-label">Clock</p>
+                <p class="summary-value" data-summary-time>5 min</p>
+              </div>
+              <div>
+                <p class="summary-label">Mode</p>
+                <p class="summary-value" data-summary-mode>Friend Match</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <p class="panel-kicker">Captured</p>
+            <div class="capture-grid">
+              <div>
+                <h3>White Lost</h3>
+                <p data-captured-white>None</p>
+              </div>
+              <div>
+                <h3>Black Lost</h3>
+                <p data-captured-black>None</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="fen-head">
+              <div>
+                <p class="panel-kicker">Position</p>
+                <h2>FEN</h2>
+              </div>
+              <div class="actions compact">
+                <button type="button" data-action="copy-fen">Copy</button>
+                <button type="button" data-action="load-fen">Load</button>
+              </div>
+            </div>
+            <textarea data-fen-input spellcheck="false"></textarea>
+          </section>
+
+          <section class="card">
+            <p class="panel-kicker">Recent Games</p>
+            <h2>Saved History</h2>
+            <ol class="saved-list" data-saved-games></ol>
+          </section>
+
+          <section class="card">
+            <p class="panel-kicker">Move Sheet</p>
+            <h2>History</h2>
+            <ol class="move-list" data-moves></ol>
+          </section>
+        </aside>
+      </main>
+
+<footer class="site-footer">
+        <p>The High-Performance Open-Source Chess Engine Built with Rust | Engineered by Quantum Leaf Automation</p>
+        <p>
+          ChesseQ is a modern, memory-safe chess engine designed for speed and tactical depth. By leveraging Magic Bitboards and a Functional State architecture, ChesseQ provides a rock-solid foundation for both TUI-based terminal play and WebAssembly-powered browser experiences.
+        </p>
+        <p>Developed by Quantum Leaf Automation | Open Source</p>
+      </footer>
+    </div>
+
+    <div class="overlay-backdrop" data-setup hidden>
+      <form class="overlay-card setup-card" data-setup-form>
+        <div class="overlay-head">
+          <div>
+            <p class="panel-kicker">New Game</p>
+            <h2>Start a match</h2>
+          </div>
+          <button type="button" class="overlay-close" data-setup-close aria-label="Close setup">×</button>
+        </div>
+
+        <div class="setup-grid">
+          <label class="field">
+            <span>White player</span>
+            <input type="text" data-setup-white maxlength="20" placeholder="White name" />
+          </label>
+
+          <label class="field">
+            <span>Black player</span>
+            <input type="text" data-setup-black maxlength="20" placeholder="Black name" />
+          </label>
+        </div>
+
+        <div class="field-group">
+          <p class="field-label">Mode</p>
+          <div class="choice-row">
+            <button type="button" class="choice-pill" data-mode-option="human">Play with Friend</button>
+            <button type="button" class="choice-pill" data-mode-option="bot">Play with Bot</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <p class="field-label">Clock</p>
+          <div class="time-grid">
+            <button type="button" class="time-pill" data-time-option="1">1 min</button>
+            <button type="button" class="time-pill" data-time-option="3">3 min</button>
+            <button type="button" class="time-pill" data-time-option="5">5 min</button>
+            <button type="button" class="time-pill" data-time-option="10">10 min</button>
+            <button type="button" class="time-pill" data-time-option="15">15 min</button>
+          </div>
+        </div>
+
+        <div class="field-group bot-only" data-bot-settings>
+          <label class="field">
+            <span>Bot style</span>
+            <select data-setup-personality>
+              <option value="aggressive">Aggressive</option>
+              <option value="defensive">Defensive</option>
+              <option value="chaotic">Chaotic</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="setup-actions">
+          <button type="submit" class="primary-button">Start Game</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="overlay-backdrop" data-promotion hidden>
+      <div class="overlay-card promotion-card">
+        <div class="overlay-head">
+          <div>
+            <p class="panel-kicker">Promotion</p>
+            <h2>Choose a piece</h2>
+          </div>
+          <button type="button" class="overlay-close" data-promotion-close aria-label="Close promotion menu">×</button>
+        </div>
+        <p class="promotion-copy">Pick the piece you want your pawn to become.</p>
+        <div class="promotion-choices" data-promotion-choices></div>
+      </div>
+    </div>
+
+    <div class="overlay-backdrop" data-result hidden>
+      <div class="overlay-card result-card">
+        <div class="overlay-head">
+          <div>
+            <p class="panel-kicker">Game Over</p>
+            <h2 data-result-title>Result</h2>
+          </div>
+          <button type="button" class="overlay-close" data-result-close aria-label="Close result popup">×</button>
+        </div>
+        <p class="result-copy" data-result-copy>Winner.</p>
+        <div class="setup-actions">
+          <button type="button" class="primary-button" data-result-new>Start Another Game</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
