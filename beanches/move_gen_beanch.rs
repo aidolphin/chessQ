@@ -1,7 +1,7 @@
 // benches/move_gen_bench.rs
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use chess_game::engine::move_gen::MoveGenerator;
-use chess_game::state::game_state::GameState;
+use chess_q::engine::move_gen::MoveGenerator;
+use chess_q::state::game_state::GameState;
 
 fn bench_move_generation(c: &mut Criterion) {
     let move_gen = MoveGenerator::new();

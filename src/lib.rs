@@ -3,6 +3,8 @@ pub mod engine {
     pub mod bitboard;
     pub mod magic;
     pub mod move_gen;
+    pub mod zobrist;
+    pub mod transposition;
 }
 
 pub mod state {
@@ -66,5 +68,46 @@ mod tests {
         assert_eq!(state.white_pawns, initial.white_pawns);
         assert_eq!(state.black_knights, initial.black_knights);
         assert_eq!(state.to_fen(), fen);
+    }
+    
+    #[test]
+    fn test_en_passant_square_calculation() {
+        use crate::engine::bitboard::Square;
+        use crate::engine::move_gen::{Move, PieceType};
+        
+        // Set up position: white pawn at e2, black pawn at e7
+        let mut state = GameState::initial();
+        
+        // White plays e4 - double push
+        let e4_move = Move {
+            from: Square::E2,
+            to: Square::E4,
+            piece: PieceType::Pawn,
+            capture: None,
+            promotion: None,
+            is_castle: false,
+            is_en_passant: false,
+        };
+        
+        state = GameState::make_move(&state, &e4_move).unwrap();
+        
+        // After e4, en passant square should be e3
+        assert_eq!(state.en_passant_square, Some(Square::E3));
+        
+        // Switch to black's turn and play e5 - double push
+        let e5_move = Move {
+            from: Square::E7,
+            to: Square::E5,
+            piece: PieceType::Pawn,
+            capture: None,
+            promotion: None,
+            is_castle: false,
+            is_en_passant: false,
+        };
+        
+        state = GameState::make_move(&state, &e5_move).unwrap();
+        
+        // After e5, en passant square should be e6
+        assert_eq!(state.en_passant_square, Some(Square::E6));
     }
 }

@@ -131,12 +131,12 @@ impl Square {
     }
     
     pub fn from_index(idx: usize) -> Option<Self> {
-        if idx < 64 {
-            // Safe: transmute is safe here because we're mapping valid indices
-            Some(unsafe { std::mem::transmute(idx as u8) })
-        } else {
-            None
+        if idx >= 64 {
+            eprintln!("WARNING: Invalid square index {} (must be 0-63)", idx);
+            return None;
         }
+        // Safe: transmute is safe here because we're mapping valid indices
+        Some(unsafe { std::mem::transmute(idx as u8) })
     }
     
     pub fn file(&self) -> usize {

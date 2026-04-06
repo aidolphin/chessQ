@@ -35,19 +35,21 @@ impl GameState {
     /// Create initial board position
     pub fn initial() -> Self {
         Self {
-            white_pawns: Bitboard(0x000000000000FF00),
-            white_knights: Bitboard(0x0000000000000042),
-            white_bishops: Bitboard(0x0000000000000024),
-            white_rooks: Bitboard(0x0000000000000081),
-            white_queens: Bitboard(0x0000000000000008),
-            white_king: Bitboard(0x0000000000000010),
+            // White pieces on rank 1 (indices 0-7) - BACK RANK
+            white_pawns: Bitboard(0x000000000000FF00),  // Rank 2 (indices 8-15)
+            white_knights: Bitboard(0x42),               // b1, g1 (indices 1, 6)
+            white_bishops: Bitboard(0x24),               // c1, f1 (indices 2, 5)
+            white_rooks: Bitboard(0x81),                  // a1, h1 (indices 0, 7)
+            white_queens: Bitboard(0x08),                 // d1 (index 3)
+            white_king: Bitboard(0x10),                   // e1 (index 4)
             
-            black_pawns: Bitboard(0x00FF000000000000),
-            black_knights: Bitboard(0x4200000000000000),
-            black_bishops: Bitboard(0x2400000000000000),
-            black_rooks: Bitboard(0x8100000000000000),
-            black_queens: Bitboard(0x0800000000000000),
-            black_king: Bitboard(0x1000000000000000),
+            // Black pieces on rank 8 (indices 56-63) - BACK RANK
+            black_pawns: Bitboard(0x00FF000000000000),    // Rank 7 (indices 48-55)
+            black_knights: Bitboard(0x4200000000000000),  // b8, g8 (indices 57, 62)
+            black_bishops: Bitboard(0x2400000000000000),  // c8, f8 (indices 58, 61)
+            black_rooks: Bitboard(0x8100000000000000),    // a8, h8 (indices 56, 63)
+            black_queens: Bitboard(0x0800000000000000),   // d8 (index 59)
+            black_king: Bitboard(0x1000000000000000),     // e8 (index 60)
             
             side_to_move: Color::White,
             en_passant_square: None,
@@ -320,6 +322,9 @@ impl GameState {
         // Update en passant square
         new_state.en_passant_square = if mv.piece == PieceType::Pawn && 
                                          (mv.to.rank() as i32 - mv.from.rank() as i32).abs() == 2 {
+            // The en passant square is the square the pawn passed through
+            // For white (moving up ranks): the square one rank up from start
+            // For black (moving down ranks): rank 5 (the only rank where black EP makes sense)
             let ep_rank = if state.side_to_move == Color::White { 2 } else { 5 };
             Some(Square::from_index(mv.from.file() + ep_rank * 8).unwrap())
         } else {

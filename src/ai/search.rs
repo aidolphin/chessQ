@@ -1,10 +1,13 @@
 // src/ai/search.rs
 use crate::ai::evaluation::{Evaluator, Personality};
 use crate::engine::move_gen::{Move, MoveGenerator, PieceType};
+use crate::engine::transposition::{TranspositionTable, NodeType};
+use crate::engine::zobrist::ZobristKeys;
 use crate::state::game_state::GameState;
 use std::time::{Duration, Instant};
 
 const SEARCH_INF: i32 = 1_000_000_000;
+const MATE_SCORE: i32 = 900_000;
 
 /// Search result containing best move and evaluation
 #[derive(Debug, Clone)]
@@ -20,6 +23,8 @@ pub struct SearchResult {
 pub struct AI {
     move_gen: MoveGenerator,
     evaluator: Evaluator,
+    transposition_table: TranspositionTable,
+    zobrist_keys: ZobristKeys,
 }
 
 impl AI {
@@ -27,6 +32,8 @@ impl AI {
         Self {
             move_gen: MoveGenerator::new(),
             evaluator: Evaluator::new(personality),
+            transposition_table: TranspositionTable::new(1_000_000), // 1M entries
+            zobrist_keys: ZobristKeys::init(),
         }
     }
     
@@ -38,8 +45,11 @@ impl AI {
         let mut nodes_searched = 0;
         let mut depth_reached = 0;
         
+        // Clear transposition table for new search
+        self.transposition_table.clear();
+        
         // Iterative deepening
-        for depth in 1..=6 {
+        for depth in 1..=10 {
             let (mv, eval, nodes) =
                 self.alpha_beta(state, depth, -SEARCH_INF, SEARCH_INF, start_time, time_limit);
             nodes_searched += nodes;
@@ -52,6 +62,11 @@ impl AI {
             
             // Check time limit
             if start_time.elapsed() >= time_limit {
+                break;
+            }
+            
+            // Stop if we found mate
+            if eval.abs() > MATE_SCORE - 1000 {
                 break;
             }
         }
@@ -71,15 +86,24 @@ impl AI {
             return (None, 0, 0);
         }
         
+        // Probe transposition table
+        let hash = self.zobrist_keys.hash_position(state);
+        if let Some((tt_score, tt_move)) = self.transposition_table.probe(hash, depth, alpha, beta) {
+            if depth > 0 && tt_score != 0 {
+                return (tt_move, tt_score, 1);
+            }
+        }
+        
+        // Quiescence search at leaf nodes
         if depth == 0 {
-            let eval = self.evaluator.evaluate(state);
+            let eval = self.quiescence_search(state, alpha, beta, 0);
             return (None, eval, 1);
         }
         
         let moves = self.move_gen.generate_moves(state);
         if moves.is_empty() {
             if state.is_check() {
-                return (None, -SEARCH_INF + 1000, 1); // Checkmate
+                return (None, -MATE_SCORE + 1000, 1); // Checkmate
             } else {
                 return (None, 0, 1); // Stalemate
             }
@@ -90,6 +114,7 @@ impl AI {
         
         let mut best_move = None;
         let mut nodes_searched = 0;
+        let original_alpha = alpha;
         
         for mv in ordered_moves.iter() {
             match GameState::make_move(state, mv) {
@@ -104,7 +129,9 @@ impl AI {
                         best_move = Some(*mv);
                         
                         if alpha >= beta {
-                            break; // Beta cutoff
+                            // Beta cutoff - store as lower bound
+                            self.transposition_table.store(hash, depth, alpha, best_move, NodeType::LowerBound);
+                            break;
                         }
                     }
                 }
@@ -112,7 +139,65 @@ impl AI {
             }
         }
         
+        // Store in transposition table
+        let node_type = if alpha <= original_alpha {
+            NodeType::UpperBound // Failed low
+        } else if alpha >= beta {
+            NodeType::LowerBound // Failed high
+        } else {
+            NodeType::Exact // PV node
+        };
+        
+        self.transposition_table.store(hash, depth, alpha, best_move, node_type);
+        
         (best_move, alpha, nodes_searched)
+    }
+    
+    /// Quiescence search to avoid horizon effect
+    fn quiescence_search(&mut self, state: &GameState, mut alpha: i32, beta: i32, depth: u32) -> i32 {
+        // Limit quiescence depth
+        if depth > 8 {
+            return self.evaluator.evaluate(state);
+        }
+        
+        let stand_pat = self.evaluator.evaluate(state);
+        
+        // Beta cutoff
+        if stand_pat >= beta {
+            return beta;
+        }
+        
+        // Update alpha
+        if stand_pat > alpha {
+            alpha = stand_pat;
+        }
+        
+        // Generate only captures
+        let moves = self.move_gen.generate_moves(state);
+        let captures: Vec<Move> = moves.into_iter()
+            .filter(|mv| mv.capture.is_some() || mv.promotion.is_some())
+            .collect();
+        
+        // Order captures by MVV-LVA
+        let ordered_captures = self.order_moves(state, captures);
+        
+        for mv in ordered_captures {
+            match GameState::make_move(state, &mv) {
+                Ok(new_state) => {
+                    let score = -self.quiescence_search(&new_state, -beta, -alpha, depth + 1);
+                    
+                    if score >= beta {
+                        return beta;
+                    }
+                    if score > alpha {
+                        alpha = score;
+                    }
+                }
+                Err(_) => continue,
+            }
+        }
+        
+        alpha
     }
     
     fn order_moves(&self, state: &GameState, moves: Vec<Move>) -> Vec<Move> {

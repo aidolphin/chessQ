@@ -118,18 +118,27 @@ impl MoveGenerator {
         let en_passant_rank = if color == Color::White { 4 } else { 3 };
         
         for from_sq in pawns.iter() {
-            let from = Square::from_index(from_sq).unwrap();
+            let from = match Square::from_index(from_sq) {
+                Some(sq) => sq,
+                None => continue,
+            };
             let to_idx = from_sq as i32 + direction;
             
             // Single push
             if (0..64).contains(&to_idx) && !occupied.has_piece(to_idx as usize) {
-                self.add_pawn_move(from, Square::from_index(to_idx as usize).unwrap(), color, moves);
+                let to_square = match Square::from_index(to_idx as usize) {
+                    Some(sq) => sq,
+                    None => continue,
+                };
+                self.add_pawn_move(from, to_square, color, moves);
                 
                 // Double push
                 if from.rank() == start_rank {
                     let to2_idx = from_sq as i32 + 2 * direction;
                     if (0..64).contains(&to2_idx) && !occupied.has_piece(to2_idx as usize) {
-                        moves.push(Move::new(from, Square::from_index(to2_idx as usize).unwrap(), PieceType::Pawn));
+                        if let Some(to2_square) = Square::from_index(to2_idx as usize) {
+                            moves.push(Move::new(from, to2_square, PieceType::Pawn));
+                        }
                     }
                 }
             }
@@ -143,7 +152,10 @@ impl MoveGenerator {
 
                 let capture_idx = from_sq as i32 + direction + offset;
                 if (0..64).contains(&capture_idx) {
-                    let capture_sq = Square::from_index(capture_idx as usize).unwrap();
+                    let capture_sq = match Square::from_index(capture_idx as usize) {
+                        Some(sq) => sq,
+                        None => continue,
+                    };
                     let capture_piece = state.piece_at(capture_sq);
                     
                     if let Some((capture_color, _)) = capture_piece {
@@ -221,7 +233,10 @@ impl MoveGenerator {
         ];
         
         for from_sq in knights.iter() {
-            let from = Square::from_index(from_sq).unwrap();
+            let from = match Square::from_index(from_sq) {
+                Some(sq) => sq,
+                None => continue,
+            };
             let file = from.file() as i32;
             let rank = from.rank() as i32;
             
@@ -230,7 +245,13 @@ impl MoveGenerator {
                 let new_rank = rank + dr;
                 if (0..8).contains(&new_file) && (0..8).contains(&new_rank) {
                     let to_idx = (new_file + new_rank * 8) as usize;
-                    let to_sq = Square::from_index(to_idx as usize).unwrap();
+                    if to_idx >= 64 {
+                        continue;
+                    }
+                    let to_sq = match Square::from_index(to_idx) {
+                        Some(sq) => sq,
+                        None => continue,
+                    };
                     if !friendly.has_piece(to_idx) {
                         let mut mv = Move::new(from, to_sq, PieceType::Knight);
                         if let Some((_, piece)) = state.piece_at(to_sq) {
@@ -265,7 +286,10 @@ impl MoveGenerator {
         let occupied = state.all_pieces();
         
         for from_sq in pieces.iter() {
-            let from = Square::from_index(from_sq).unwrap();
+            let from = match Square::from_index(from_sq) {
+                Some(sq) => sq,
+                None => continue,
+            };
             let attacks = if is_rook && is_bishop {
                 self.magic_tables.queen_attacks(from, occupied)
             } else if is_rook {
@@ -276,11 +300,13 @@ impl MoveGenerator {
             
             for to_sq in attacks.iter() {
                 if !friendly.has_piece(to_sq) {
-                    let mut mv = Move::new(from, Square::from_index(to_sq).unwrap(), piece_type);
-                    if let Some((_, piece)) = state.piece_at(Square::from_index(to_sq).unwrap()) {
-                        mv.capture = Some(piece);
+                    if let Some(to_square) = Square::from_index(to_sq) {
+                        let mut mv = Move::new(from, to_square, piece_type);
+                        if let Some((_, piece)) = state.piece_at(to_square) {
+                            mv.capture = Some(piece);
+                        }
+                        moves.push(mv);
                     }
-                    moves.push(mv);
                 }
             }
         }
@@ -313,7 +339,10 @@ impl MoveGenerator {
         ];
         
         for from_sq in king.iter() {
-            let from = Square::from_index(from_sq).unwrap();
+            let from = match Square::from_index(from_sq) {
+                Some(sq) => sq,
+                None => continue,
+            };
             let file = from.file() as i32;
             let rank = from.rank() as i32;
             
@@ -322,7 +351,13 @@ impl MoveGenerator {
                 let new_rank = rank + dr;
                 if (0..8).contains(&new_file) && (0..8).contains(&new_rank) {
                     let to_idx = (new_file + new_rank * 8) as usize;
-                    let to_sq = Square::from_index(to_idx).unwrap();
+                    if to_idx >= 64 {
+                        continue;
+                    }
+                    let to_sq = match Square::from_index(to_idx) {
+                        Some(sq) => sq,
+                        None => continue,
+                    };
                     if !friendly.has_piece(to_idx) {
                         let mut mv = Move::new(from, to_sq, PieceType::King);
                         if let Some((_, piece)) = state.piece_at(to_sq) {

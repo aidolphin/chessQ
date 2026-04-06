@@ -325,11 +325,20 @@ impl Evaluator {
         }
     }
     
-    fn evaluate_mobility(&self, _state: &GameState) -> i32 {
-        // Simplified mobility: count number of legal moves
-        // In a full implementation, this would use the move generator
-        // For now, return a placeholder
-        0
+    fn evaluate_mobility(&self, state: &GameState) -> i32 {
+        // Count legal moves for both sides
+        let move_gen = crate::engine::move_gen::MoveGenerator::new();
+        
+        // White mobility
+        let white_moves = move_gen.generate_moves(state).len();
+        
+        // Black mobility (temporarily switch sides)
+        let mut black_state = state.clone();
+        black_state.side_to_move = Color::Black;
+        let black_moves = move_gen.generate_moves(&black_state).len();
+        
+        // Weight: 5 centipawns per move
+        (white_moves as i32 - black_moves as i32) * 5
     }
     
     fn evaluate_pawn_structure(&self, state: &GameState) -> i32 {
@@ -378,6 +387,59 @@ impl Evaluator {
             }
         }
         
+        // Evaluate passed pawns
+        white_score += self.evaluate_passed_pawns(state, Color::White);
+        black_score += self.evaluate_passed_pawns(state, Color::Black);
+        
         white_score - black_score
+    }
+    
+    fn evaluate_passed_pawns(&self, state: &GameState, color: Color) -> i32 {
+        let mut score = 0;
+        let pawns = if color == Color::White { state.white_pawns } else { state.black_pawns };
+        let enemy_pawns = if color == Color::White { state.black_pawns } else { state.white_pawns };
+        
+        for square in pawns.iter() {
+            let sq = crate::engine::bitboard::Square::from_index(square).unwrap();
+            let file = sq.file();
+            let rank = sq.rank();
+            
+            // Check if this is a passed pawn
+            let mut is_passed = true;
+            
+            // Check files: current, left, right
+            for check_file in (file.saturating_sub(1))..=(file + 1).min(7) {
+                // Check ranks ahead of this pawn
+                let rank_range: Vec<usize> = if color == Color::White {
+                    (rank + 1..8).collect()
+                } else {
+                    (0..rank).collect()
+                };
+                
+                for check_rank in rank_range {
+                    let check_sq = check_file + check_rank * 8;
+                    if enemy_pawns.has_piece(check_sq) {
+                        is_passed = false;
+                        break;
+                    }
+                }
+                
+                if !is_passed {
+                    break;
+                }
+            }
+            
+            if is_passed {
+                // Bonus increases with rank (closer to promotion)
+                let rank_bonus = if color == Color::White {
+                    rank as i32
+                } else {
+                    (7 - rank) as i32
+                };
+                score += 50 + (rank_bonus * 30);
+            }
+        }
+        
+        score
     }
 }
