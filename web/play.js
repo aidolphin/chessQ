@@ -194,6 +194,7 @@ const elements = {
 // === Initialize ===
 document.addEventListener('DOMContentLoaded', () => {
   loadProfile();
+  loadNotifications();
   initializeGame();
   setupEventListeners();
   updateEconomyDisplay();
@@ -338,6 +339,13 @@ function setupEventListeners() {
   document.getElementById('userMenuBtn')?.addEventListener('click', showProfileModal);
   
   // Notification close
+  document.getElementById('notificationBtn')?.addEventListener('click', toggleNotificationPanel);
+  document.getElementById('notifClose')?.addEventListener('click', () => {
+    document.getElementById('notificationPanel').classList.add('hidden');
+  });
+  document.getElementById('notifMarkAllRead')?.addEventListener('click', markAllNotificationsRead);
+  
+  // Toast close
   document.getElementById('toastClose')?.addEventListener('click', () => {
     elements.notificationToast.classList.add('hidden');
   });
@@ -421,6 +429,7 @@ function closeTimeControlModal() {
 function showLearningMode() {
   elements.modeSelection.classList.add('hidden');
   elements.learningContainer.classList.remove('hidden');
+  learnShowChapterSelect();
 }
 
 function showCustomChallenge() {
@@ -472,34 +481,43 @@ async function initializeBoard() {
 }
 
 // === Board Rendering ===
-// CRITICAL: Board array from API is indexed rank 8 → rank 1 (top to bottom)
-// Index 0-7 = rank 8, 8-15 = rank 7, ..., 56-63 = rank 1
-// We must calculate boardIndex = (8 - rank) * 8 + fileIndex to match API ordering
+// API board array: index 0-7 = rank 8, 56-63 = rank 1
+// When playing as black, flip the board so black pieces are at the bottom
 function renderBoard() {
   const board = elements.chessBoard;
   board.innerHTML = '';
-  
+
   const files = 'abcdefgh';
-  const ranks = [8, 7, 6, 5, 4, 3, 2, 1];
-  
+  const playingAsBlack = gameState.playerColor === 'b';
+
+  // Ranks and files from the player's perspective
+  const ranks = playingAsBlack ? [1,2,3,4,5,6,7,8] : [8,7,6,5,4,3,2,1];
+  const fileIndices = playingAsBlack ? [7,6,5,4,3,2,1,0] : [0,1,2,3,4,5,6,7];
+
+  // Update coordinate labels
+  const leftCoords = document.querySelector('.board-coords-left');
+  const rightCoords = document.querySelector('.board-coords-right');
+  const bottomCoords = document.querySelector('.board-coords-bottom');
+  if (leftCoords) leftCoords.innerHTML = ranks.map(r => `<span>${r}</span>`).join('');
+  if (rightCoords) rightCoords.innerHTML = ranks.map(r => `<span>${r}</span>`).join('');
+  if (bottomCoords) bottomCoords.innerHTML = fileIndices.map(f => `<span>${files[f]}</span>`).join('');
+
   for (const rank of ranks) {
-    for (let fileIndex = 0; fileIndex < 8; fileIndex++) {
+    for (const fileIndex of fileIndices) {
       const file = files[fileIndex];
       const coord = `${file}${rank}`;
-      
-      // Calculate board array index: API sends board from rank 8 to rank 1
+
+      // API sends board from rank 8 to rank 1
       const boardIndex = (8 - rank) * 8 + fileIndex;
-      
+
       const square = document.createElement('div');
       square.className = 'square';
       square.dataset.square = coord;
       square.dataset.index = boardIndex;
-      
-      // Light or dark square
+
       const isLight = (fileIndex + rank) % 2 === 0;
       square.classList.add(isLight ? 'light' : 'dark');
-      
-      // Add piece if exists
+
       const piece = gameState.board[boardIndex];
       if (piece) {
         const pieceElement = document.createElement('span');
@@ -507,10 +525,8 @@ function renderBoard() {
         pieceElement.textContent = PIECES[piece];
         square.appendChild(pieceElement);
       }
-      
-      // Click handler
+
       square.addEventListener('click', () => handleSquareClick(coord, boardIndex));
-      
       board.appendChild(square);
     }
   }
@@ -774,25 +790,33 @@ function endGame(status) {
   
   // Update game statistics
   playerProfile.gamesPlayed++;
+  let gameResult = '';
   if (status.phase === 'checkmate') {
     if (status.winner === gameState.playerColor) {
       playerProfile.gamesWon++;
+      gameResult = 'won';
     } else {
       playerProfile.gamesLost++;
+      gameResult = 'lost';
     }
   } else if (status.phase === 'stalemate') {
     playerProfile.gamesDraw++;
+    gameResult = 'draw';
   } else if (status.phase === 'resignation') {
     if (status.winner === gameState.playerColor) {
       playerProfile.gamesWon++;
+      gameResult = 'won';
     } else {
       playerProfile.gamesLost++;
+      gameResult = 'lost';
     }
   } else if (status.phase === 'timeout') {
     if (status.winner === gameState.playerColor) {
       playerProfile.gamesWon++;
+      gameResult = 'won';
     } else {
       playerProfile.gamesLost++;
+      gameResult = 'lost';
     }
   }
   
@@ -801,6 +825,15 @@ function endGame(status) {
   
   // Update economy
   updateEconomy(rewards);
+  
+  // Add notification
+  if (gameResult === 'won') {
+    addNotification('game', 'Victory!', `You won! Earned $${rewards.cash.toFixed(2)} and ${rewards.gifts} gifts`);
+  } else if (gameResult === 'lost') {
+    addNotification('game', 'Defeat', `You lost. Earned ${rewards.gifts} gifts for playing`);
+  } else {
+    addNotification('game', 'Draw', `Game ended in a draw. Earned ${rewards.gifts} gifts`);
+  }
   
   // Save profile
   saveProfile();
@@ -909,26 +942,33 @@ function updateRankingDisplay() {
 // === Result Modal ===
 function showResultModal(status, rewards) {
   const modal = elements.resultModal;
-  
-  document.getElementById('resultTitle').textContent = 
-    status.phase === 'checkmate' ? 'Checkmate!' : 
-    status.phase === 'stalemate' ? 'Draw' : 'Game Over';
-  
+
+  const playerWon = status.winner === gameState.playerColor;
+  const isDraw = status.phase === 'stalemate';
+
+  document.getElementById('resultTitle').textContent =
+    isDraw ? '🤝 Draw!' :
+    status.phase === 'checkmate' ? (playerWon ? '🏆 You Win!' : '💀 You Lose!') :
+    status.phase === 'timeout' ? (playerWon ? '⏱ You Win on Time!' : '⏱ Time Out!') :
+    status.phase === 'resignation' ? 'Resigned' : 'Game Over';
+
   document.getElementById('resultMessage').textContent = status.message;
   document.getElementById('cashEarned').textContent = `$${rewards.cash.toFixed(2)}`;
   document.getElementById('giftsEarnedResult').textContent = rewards.gifts;
   document.getElementById('ratingChange').textContent = `${rewards.eloChange >= 0 ? '+' : ''}${rewards.eloChange}`;
-  
+
+  modal.style.display = 'flex';
   modal.classList.remove('hidden');
-  
+
   document.getElementById('playAgainBtn').onclick = () => {
+    modal.style.display = 'none';
     modal.classList.add('hidden');
     showModeSelection();
   };
-  
+
   document.getElementById('viewAnalysisBtn').onclick = () => {
+    modal.style.display = 'none';
     modal.classList.add('hidden');
-    // Scroll to analysis
     document.getElementById('analysisSection')?.scrollIntoView({ behavior: 'smooth' });
   };
 }
@@ -1014,6 +1054,141 @@ function addChatMessage(sender, text) {
   
   messagesContainer.appendChild(messageDiv);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// === Notifications System ===
+let notifications = [];
+let unreadCount = 0;
+
+function loadNotifications() {
+  const saved = localStorage.getItem('chessq_notifications');
+  if (saved) {
+    try {
+      notifications = JSON.parse(saved);
+      updateNotificationBadge();
+    } catch (e) {
+      console.error('Failed to load notifications:', e);
+    }
+  }
+}
+
+function saveNotifications() {
+  localStorage.setItem('chessq_notifications', JSON.stringify(notifications));
+}
+
+function addNotification(type, title, message) {
+  const notif = {
+    id: Date.now(),
+    type, // 'game', 'achievement', 'system', 'friend'
+    title,
+    message,
+    timestamp: Date.now(),
+    read: false
+  };
+  
+  notifications.unshift(notif);
+  if (notifications.length > 50) notifications = notifications.slice(0, 50);
+  
+  saveNotifications();
+  updateNotificationBadge();
+  renderNotifications();
+  
+  // Show toast
+  showNotification(title, message);
+}
+
+function updateNotificationBadge() {
+  unreadCount = notifications.filter(n => !n.read).length;
+  const badge = document.getElementById('notificationBadge');
+  if (badge) {
+    if (unreadCount > 0) {
+      badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  }
+}
+
+function toggleNotificationPanel() {
+  const panel = document.getElementById('notificationPanel');
+  panel.classList.toggle('hidden');
+  
+  if (!panel.classList.contains('hidden')) {
+    renderNotifications();
+  }
+}
+
+function renderNotifications() {
+  const list = document.getElementById('notifList');
+  const empty = document.getElementById('notifEmpty');
+  
+  if (notifications.length === 0) {
+    empty.classList.remove('hidden');
+    return;
+  }
+  
+  empty.classList.add('hidden');
+  
+  const notifHTML = notifications.map(n => {
+    const icon = {
+      'game': '♟',
+      'achievement': '🏆',
+      'system': '⚙️',
+      'friend': '👤'
+    }[n.type] || '🔔';
+    
+    const timeAgo = formatTimeAgo(n.timestamp);
+    
+    return `
+      <div class="notif-item ${n.read ? 'notif-read' : 'notif-unread'}" data-id="${n.id}">
+        <div class="notif-icon">${icon}</div>
+        <div class="notif-content">
+          <div class="notif-title">${n.title}</div>
+          <div class="notif-message">${n.message}</div>
+          <div class="notif-time">${timeAgo}</div>
+        </div>
+        ${!n.read ? '<div class="notif-dot"></div>' : ''}
+      </div>
+    `;
+  }).join('');
+  
+  list.innerHTML = notifHTML;
+  
+  // Add click handlers
+  list.querySelectorAll('.notif-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const id = parseInt(item.dataset.id);
+      markNotificationRead(id);
+    });
+  });
+}
+
+function markNotificationRead(id) {
+  const notif = notifications.find(n => n.id === id);
+  if (notif && !notif.read) {
+    notif.read = true;
+    saveNotifications();
+    updateNotificationBadge();
+    renderNotifications();
+  }
+}
+
+function markAllNotificationsRead() {
+  notifications.forEach(n => n.read = true);
+  saveNotifications();
+  updateNotificationBadge();
+  renderNotifications();
+}
+
+function formatTimeAgo(timestamp) {
+  const seconds = Math.floor((Date.now() - timestamp) / 1000);
+  
+  if (seconds < 60) return 'Just now';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+  return new Date(timestamp).toLocaleDateString();
 }
 
 // === Notifications ===

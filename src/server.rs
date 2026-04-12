@@ -233,8 +233,25 @@ fn handle_api(stream: &mut TcpStream, path: &str, query: &str) -> io::Result<()>
     }
 }
 
+fn web_root() -> std::path::PathBuf {
+    // Try exe-relative path first, then fall back to cwd
+    if let Ok(exe) = std::env::current_exe() {
+        // When running via `cargo run`, exe is in target/debug/ — go up to project root
+        let mut candidate = exe.clone();
+        for _ in 0..4 {
+            candidate.pop();
+            let web = candidate.join("web");
+            if web.is_dir() {
+                return web;
+            }
+        }
+    }
+    // Fallback: relative to current working directory
+    Path::new("web").to_path_buf()
+}
+
 fn serve_static(stream: &mut TcpStream, path: &str) -> io::Result<()> {
-    let web_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("web");
+    let web_root = web_root();
     let relative = if path == "/" { "index.html" } else { path.trim_start_matches('/') };
 
     if relative.contains("..") || relative.contains('\\') {

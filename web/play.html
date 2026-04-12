@@ -21,11 +21,8 @@
       </a>
       
       <div class="nav-links">
-        <a href="#learn" class="nav-link">Learn</a>
-        <a href="#puzzles" class="nav-link">Puzzles</a>
-        <a href="#watch" class="nav-link">Watch</a>
-        <a href="#rules" class="nav-link">Rules</a>
-        <a href="/profile" class="nav-link">Profile</a>
+        <a href="/" class="nav-link">Home</a>
+        <a href="/play.html" class="nav-link">Play</a>
       </div>
       
       <div class="nav-actions">
@@ -34,7 +31,7 @@
             <path d="M10 2C7.8 2 6 3.8 6 6V9L4 11V13H16V11L14 9V6C14 3.8 12.2 2 10 2Z" stroke="currentColor" stroke-width="1.5"/>
             <path d="M8 13V14C8 15.1 8.9 16 10 16C11.1 16 12 15.1 12 14V13" stroke="currentColor" stroke-width="1.5"/>
           </svg>
-          <span class="notification-badge">3</span>
+          <span class="notification-badge hidden" id="notificationBadge">0</span>
         </button>
         
         <button class="btn-icon" id="chatToggle" aria-label="Chat">
@@ -369,11 +366,11 @@
             <span>8</span><span>7</span><span>6</span><span>5</span>
             <span>4</span><span>3</span><span>2</span><span>1</span>
           </div>
-        </div>
-        
-        <div class="board-coordinates board-coords-bottom">
-          <span>a</span><span>b</span><span>c</span><span>d</span>
-          <span>e</span><span>f</span><span>g</span><span>h</span>
+          
+          <div class="board-coordinates board-coords-bottom">
+            <span>a</span><span>b</span><span>c</span><span>d</span>
+            <span>e</span><span>f</span><span>g</span><span>h</span>
+          </div>
         </div>
 
         <!-- Bottom Player Info -->
@@ -426,42 +423,50 @@
         </div>
       </div>
 
-      <!-- Learning Mode Content -->
+      <!-- Learning Mode -->
       <div class="learning-container hidden" id="learningContainer">
-        <div class="learning-header">
-          <h2>Chess Learning Center</h2>
-          <button class="btn-back" id="backToModes">← Back to Modes</button>
+
+        <!-- Chapter Select -->
+        <div id="learnChapterSelect">
+          <div class="lc-header">
+            <button class="lc-back" id="backToModes">← Back</button>
+            <div>
+              <h2 class="lc-title">Learn Chess</h2>
+              <p class="lc-sub">Pick a chapter. Each one teaches with a live board.</p>
+            </div>
+          </div>
+          <div class="lc-chapters" id="lcChapters"></div>
         </div>
-        
-        <div class="learning-grid">
-          <div class="learning-card" data-lesson="pieces">
-            <div class="lesson-icon">♟️</div>
-            <h3>Piece Movements</h3>
-            <p>Learn how each piece moves and captures</p>
-            <button class="btn-learn">Start Lesson</button>
+
+        <!-- Lesson Player -->
+        <div id="learnPlayer" class="hidden">
+          <div class="lp-topbar">
+            <button class="lc-back" id="lpBack">← Chapters</button>
+            <div class="lp-chapter-title" id="lpChapterTitle"></div>
+            <div class="lp-steps" id="lpSteps"></div>
           </div>
-          
-          <div class="learning-card" data-lesson="checkmate">
-            <div class="lesson-icon">♔</div>
-            <h3>Checkmate Patterns</h3>
-            <p>Master common checkmate techniques</p>
-            <button class="btn-learn">Start Lesson</button>
-          </div>
-          
-          <div class="learning-card" data-lesson="openings">
-            <div class="lesson-icon">🎯</div>
-            <h3>Opening Principles</h3>
-            <p>Understand the fundamentals of chess openings</p>
-            <button class="btn-learn">Start Lesson</button>
-          </div>
-          
-          <div class="learning-card" data-lesson="endgame">
-            <div class="lesson-icon">🏰</div>
-            <h3>Endgame Basics</h3>
-            <p>Learn essential endgame positions</p>
-            <button class="btn-learn">Start Lesson</button>
+          <div class="lp-body">
+            <div class="lp-board-col">
+              <div class="lp-board" id="lpBoard"></div>
+              <div class="lp-board-hint" id="lpBoardHint"></div>
+            </div>
+            <div class="lp-content-col">
+              <div class="lp-step-num" id="lpStepNum"></div>
+              <div class="lp-step-title" id="lpStepTitle"></div>
+              <div class="lp-step-body" id="lpStepBody"></div>
+              <div class="lp-quiz hidden" id="lpQuiz">
+                <p class="lp-quiz-q" id="lpQuizQ"></p>
+                <div class="lp-quiz-opts" id="lpQuizOpts"></div>
+                <div class="lp-quiz-result hidden" id="lpQuizResult"></div>
+              </div>
+              <div class="lp-nav">
+                <button class="lp-btn-prev" id="lpPrev">← Previous</button>
+                <button class="lp-btn-next" id="lpNext">Next →</button>
+              </div>
+            </div>
           </div>
         </div>
+
       </div>
 
     </main>
@@ -602,6 +607,27 @@
     </div>
   </div>
 
+  <!-- Notification Panel -->
+  <div class="notification-panel hidden" id="notificationPanel">
+    <div class="notif-header">
+      <h3>Notifications</h3>
+      <div class="notif-actions">
+        <button class="notif-mark-read" id="notifMarkAllRead">Mark all read</button>
+        <button class="notif-close" id="notifClose">&times;</button>
+      </div>
+    </div>
+    
+    <div class="notif-list" id="notifList">
+      <div class="notif-empty" id="notifEmpty">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <path d="M24 8C18.4 8 14 12.4 14 18V24L10 28V32H38V28L34 24V18C34 12.4 29.6 8 24 8Z" stroke="currentColor" stroke-width="2"/>
+          <path d="M20 32V34C20 36.2 21.8 38 24 38C26.2 38 28 36.2 28 34V32" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <p>No notifications yet</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Notification Toast -->
   <div class="notification-toast hidden" id="notificationToast">
     <div class="toast-icon">🔔</div>
@@ -700,5 +726,6 @@
   </div>
 
   <script src="./play.js"></script>
+  <script src="./learn.js"></script>
 </body>
 </html>

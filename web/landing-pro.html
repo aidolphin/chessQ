@@ -171,49 +171,50 @@
               <path d="M12 2L4 6V12C4 17 8 21 12 23C16 21 20 17 20 12V6L12 2Z" stroke="currentColor" stroke-width="2"/>
             </svg>
           </div>
-          <h3>Security Features</h3>
+          <h3>Security</h3>
           <ul class="feature-list">
-            <li>End-to-end encryption</li>
-            <li>Fair play detection</li>
-            <li>Secure authentication</li>
-            <li>Regular security audits</li>
+            <li>Rust memory safety</li>
+            <li>Local game state</li>
+            <li>Open source code</li>
+            <li>No account required</li>
           </ul>
-          <a href="/security" class="card-link">View Security Details →</a>
+          <a href="https://github.com/aidolphin/chessQ" class="card-link">View Source Code →</a>
         </div>
         
-        <!-- Blog & Updates -->
+        <!-- Learning Resources -->
+        <div class="profile-card">
+          <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Learn Chess</h3>
+          <ul class="feature-list">
+            <li>Interactive lessons</li>
+            <li>Piece movement guides</li>
+            <li>Tactics training</li>
+            <li>Checkmate patterns</li>
+          </ul>
+          <a href="/play.html" class="card-link" onclick="localStorage.setItem('chessq_mode', 'learning'); return true;">Start Learning →</a>
+        </div>
+        
+        <!-- Game Features -->
         <div class="profile-card">
           <div class="card-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
-              <path d="M7 7H17M7 12H17M7 17H13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M3 9H21M9 3V21" stroke="currentColor" stroke-width="2"/>
             </svg>
           </div>
-          <h3>Blog & Updates</h3>
+          <h3>Game Modes</h3>
           <ul class="feature-list">
-            <li>Latest platform updates</li>
-            <li>Strategy guides</li>
-            <li>Tournament announcements</li>
-            <li>Community highlights</li>
+            <li>Play vs AI opponent</li>
+            <li>Local multiplayer</li>
+            <li>Multiple time controls</li>
+            <li>Move history & analysis</li>
           </ul>
-          <a href="/blog" class="card-link">Read Blog →</a>
-        </div>
-        
-        <!-- Developer API -->
-        <div class="profile-card">
-          <div class="card-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M8 6L4 12L8 18M16 6L20 12L16 18M14 4L10 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <h3>Developer API</h3>
-          <ul class="feature-list">
-            <li>RESTful API endpoints</li>
-            <li>Comprehensive documentation</li>
-            <li>WebSocket support</li>
-            <li>Rate limiting included</li>
-          </ul>
-          <a href="/docs/api" class="card-link">View API Docs →</a>
+          <a href="/play.html" class="card-link">Play Now →</a>
         </div>
       </div>
     </div>
@@ -278,7 +279,7 @@
           <h4>Developers</h4>
           <ul class="footer-links">
             <li><a href="/docs/api">API Docs</a></li>
-            <li><a href="https://github.com/chessq">GitHub</a></li>
+            <li><a href="https://github.com/aidolphin/chessQ">GitHub</a></li>
             <li><a href="/api/keys">Get API Key</a></li>
             <li><a href="/contribute">Contribute</a></li>
           </ul>
