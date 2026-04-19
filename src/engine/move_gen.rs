@@ -5,7 +5,12 @@ use crate::state::game_state::GameState;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PieceType {
-    Pawn, Knight, Bishop, Rook, Queen, King
+    Pawn,
+    Knight,
+    Bishop,
+    Rook,
+    Queen,
+    King,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -46,7 +51,7 @@ impl Move {
             is_en_passant: false,
         }
     }
-    
+
     pub fn algebraic(&self) -> String {
         let mut notation = self.from_to_str();
         if let Some(promotion) = self.promotion {
@@ -62,16 +67,25 @@ impl Move {
         }
         notation
     }
-    
+
     fn from_to_str(&self) -> String {
-        format!("{}{}", self.square_to_str(self.from), 
-                self.square_to_str(self.to))
+        format!(
+            "{}{}",
+            self.square_to_str(self.from),
+            self.square_to_str(self.to)
+        )
     }
-    
+
     fn square_to_str(&self, square: Square) -> String {
         let file = match square.file() {
-            0 => 'a', 1 => 'b', 2 => 'c', 3 => 'd',
-            4 => 'e', 5 => 'f', 6 => 'g', 7 => 'h',
+            0 => 'a',
+            1 => 'b',
+            2 => 'c',
+            3 => 'd',
+            4 => 'e',
+            5 => 'f',
+            6 => 'g',
+            7 => 'h',
             _ => unreachable!(),
         };
         let rank = (square.rank() + 1) as u8;
@@ -90,12 +104,12 @@ impl MoveGenerator {
             magic_tables: MagicTables::init(),
         }
     }
-    
+
     /// Generate all pseudo-legal moves for a position
     pub fn generate_moves(&self, state: &GameState) -> Vec<Move> {
         let mut moves = Vec::new();
         let side = state.side_to_move;
-        
+
         // Generate moves for each piece type
         self.generate_pawn_moves(state, side, &mut moves);
         self.generate_knight_moves(state, side, &mut moves);
@@ -103,27 +117,31 @@ impl MoveGenerator {
         self.generate_rook_moves(state, side, &mut moves);
         self.generate_queen_moves(state, side, &mut moves);
         self.generate_king_moves(state, side, &mut moves);
-        
+
         // Filter to only legal moves (not leaving king in check)
         moves.retain(|mv| self.is_legal_move(state, mv));
-        
+
         moves
     }
-    
+
     fn generate_pawn_moves(&self, state: &GameState, color: Color, moves: &mut Vec<Move>) {
-        let pawns = if color == Color::White { state.white_pawns } else { state.black_pawns };
+        let pawns = if color == Color::White {
+            state.white_pawns
+        } else {
+            state.black_pawns
+        };
         let occupied = state.all_pieces();
         let direction = if color == Color::White { 8 } else { -8 };
         let start_rank = if color == Color::White { 1 } else { 6 };
         let en_passant_rank = if color == Color::White { 4 } else { 3 };
-        
+
         for from_sq in pawns.iter() {
             let from = match Square::from_index(from_sq) {
                 Some(sq) => sq,
                 None => continue,
             };
             let to_idx = from_sq as i32 + direction;
-            
+
             // Single push
             if (0..64).contains(&to_idx) && !occupied.has_piece(to_idx as usize) {
                 let to_square = match Square::from_index(to_idx as usize) {
@@ -131,7 +149,7 @@ impl MoveGenerator {
                     None => continue,
                 };
                 self.add_pawn_move(from, to_square, color, moves);
-                
+
                 // Double push
                 if from.rank() == start_rank {
                     let to2_idx = from_sq as i32 + 2 * direction;
@@ -142,7 +160,7 @@ impl MoveGenerator {
                     }
                 }
             }
-            
+
             // Captures
             for offset in [-1, 1] {
                 let target_file = from.file() as i32 + offset;
@@ -157,13 +175,13 @@ impl MoveGenerator {
                         None => continue,
                     };
                     let capture_piece = state.piece_at(capture_sq);
-                    
+
                     if let Some((capture_color, _)) = capture_piece {
                         if capture_color != color {
                             self.add_pawn_capture(from, capture_sq, color, state, moves);
                         }
                     }
-                    
+
                     // En passant
                     if let Some(ep_sq) = state.en_passant_square {
                         if capture_idx as usize == ep_sq.index() && from.rank() == en_passant_rank {
@@ -177,13 +195,18 @@ impl MoveGenerator {
             }
         }
     }
-    
+
     fn add_pawn_move(&self, from: Square, to: Square, color: Color, moves: &mut Vec<Move>) {
         let promotion_rank = if color == Color::White { 7 } else { 0 };
-        
+
         if to.rank() == promotion_rank {
             // Add all promotion options
-            for promo in [PieceType::Queen, PieceType::Rook, PieceType::Bishop, PieceType::Knight] {
+            for promo in [
+                PieceType::Queen,
+                PieceType::Rook,
+                PieceType::Bishop,
+                PieceType::Knight,
+            ] {
                 let mut mv = Move::new(from, to, PieceType::Pawn);
                 mv.promotion = Some(promo);
                 moves.push(mv);
@@ -192,7 +215,7 @@ impl MoveGenerator {
             moves.push(Move::new(from, to, PieceType::Pawn));
         }
     }
-    
+
     fn add_pawn_capture(
         &self,
         from: Square,
@@ -205,7 +228,12 @@ impl MoveGenerator {
         let captured_piece = state.piece_at(to).map(|(_, piece)| piece);
 
         if to.rank() == promotion_rank {
-            for promo in [PieceType::Queen, PieceType::Rook, PieceType::Bishop, PieceType::Knight] {
+            for promo in [
+                PieceType::Queen,
+                PieceType::Rook,
+                PieceType::Bishop,
+                PieceType::Knight,
+            ] {
                 let mut mv = Move::new(from, to, PieceType::Pawn);
                 mv.capture = captured_piece;
                 mv.promotion = Some(promo);
@@ -219,7 +247,11 @@ impl MoveGenerator {
     }
 
     fn generate_knight_moves(&self, state: &GameState, color: Color, moves: &mut Vec<Move>) {
-        let knights = if color == Color::White { state.white_knights } else { state.black_knights };
+        let knights = if color == Color::White {
+            state.white_knights
+        } else {
+            state.black_knights
+        };
         let friendly = state.pieces_of_color(color);
         let knight_offsets = [
             (1i32, 2i32),
@@ -231,7 +263,7 @@ impl MoveGenerator {
             (-2, 1),
             (-1, 2),
         ];
-        
+
         for from_sq in knights.iter() {
             let from = match Square::from_index(from_sq) {
                 Some(sq) => sq,
@@ -239,7 +271,7 @@ impl MoveGenerator {
             };
             let file = from.file() as i32;
             let rank = from.rank() as i32;
-            
+
             for &(df, dr) in &knight_offsets {
                 let new_file = file + df;
                 let new_rank = rank + dr;
@@ -263,28 +295,45 @@ impl MoveGenerator {
             }
         }
     }
-    
-    fn generate_sliding_moves(&self, state: &GameState, color: Color, 
-                              piece_type: PieceType, moves: &mut Vec<Move>) {
+
+    fn generate_sliding_moves(
+        &self,
+        state: &GameState,
+        color: Color,
+        piece_type: PieceType,
+        moves: &mut Vec<Move>,
+    ) {
         let (pieces, is_rook, is_bishop) = match piece_type {
             PieceType::Bishop => {
-                let pieces = if color == Color::White { state.white_bishops } else { state.black_bishops };
+                let pieces = if color == Color::White {
+                    state.white_bishops
+                } else {
+                    state.black_bishops
+                };
                 (pieces, false, true)
-            },
+            }
             PieceType::Rook => {
-                let pieces = if color == Color::White { state.white_rooks } else { state.black_rooks };
+                let pieces = if color == Color::White {
+                    state.white_rooks
+                } else {
+                    state.black_rooks
+                };
                 (pieces, true, false)
-            },
+            }
             PieceType::Queen => {
-                let pieces = if color == Color::White { state.white_queens } else { state.black_queens };
+                let pieces = if color == Color::White {
+                    state.white_queens
+                } else {
+                    state.black_queens
+                };
                 (pieces, true, true)
-            },
+            }
             _ => return,
         };
-        
+
         let friendly = state.pieces_of_color(color);
         let occupied = state.all_pieces();
-        
+
         for from_sq in pieces.iter() {
             let from = match Square::from_index(from_sq) {
                 Some(sq) => sq,
@@ -297,7 +346,7 @@ impl MoveGenerator {
             } else {
                 self.magic_tables.bishop_attacks(from, occupied)
             };
-            
+
             for to_sq in attacks.iter() {
                 if !friendly.has_piece(to_sq) {
                     if let Some(to_square) = Square::from_index(to_sq) {
@@ -311,21 +360,25 @@ impl MoveGenerator {
             }
         }
     }
-    
+
     fn generate_bishop_moves(&self, state: &GameState, color: Color, moves: &mut Vec<Move>) {
         self.generate_sliding_moves(state, color, PieceType::Bishop, moves);
     }
-    
+
     fn generate_rook_moves(&self, state: &GameState, color: Color, moves: &mut Vec<Move>) {
         self.generate_sliding_moves(state, color, PieceType::Rook, moves);
     }
-    
+
     fn generate_queen_moves(&self, state: &GameState, color: Color, moves: &mut Vec<Move>) {
         self.generate_sliding_moves(state, color, PieceType::Queen, moves);
     }
-    
+
     fn generate_king_moves(&self, state: &GameState, color: Color, moves: &mut Vec<Move>) {
-        let king = if color == Color::White { state.white_king } else { state.black_king };
+        let king = if color == Color::White {
+            state.white_king
+        } else {
+            state.black_king
+        };
         let friendly = state.pieces_of_color(color);
         let king_offsets = [
             (-1i32, -1i32),
@@ -337,7 +390,7 @@ impl MoveGenerator {
             (0, 1),
             (1, 1),
         ];
-        
+
         for from_sq in king.iter() {
             let from = match Square::from_index(from_sq) {
                 Some(sq) => sq,
@@ -345,7 +398,7 @@ impl MoveGenerator {
             };
             let file = from.file() as i32;
             let rank = from.rank() as i32;
-            
+
             for &(df, dr) in &king_offsets {
                 let new_file = file + df;
                 let new_rank = rank + dr;
@@ -367,62 +420,76 @@ impl MoveGenerator {
                     }
                 }
             }
-            
+
             // Castling
             self.add_castling_moves(state, color, from, moves);
         }
     }
-    
-    fn add_castling_moves(&self, state: &GameState, color: Color, 
-                          king_sq: Square, moves: &mut Vec<Move>) {
+
+    fn add_castling_moves(
+        &self,
+        state: &GameState,
+        color: Color,
+        king_sq: Square,
+        moves: &mut Vec<Move>,
+    ) {
         let back_rank = if color == Color::White { 0 } else { 7 };
         let (kingside, queenside) = match color {
-            Color::White => (state.castling_kingside_white, state.castling_queenside_white),
-            Color::Black => (state.castling_kingside_black, state.castling_queenside_black),
+            Color::White => (
+                state.castling_kingside_white,
+                state.castling_queenside_white,
+            ),
+            Color::Black => (
+                state.castling_kingside_black,
+                state.castling_queenside_black,
+            ),
         };
-        
+
         if kingside {
             let f1 = Square::from_index(5 + back_rank * 8).unwrap();
             let g1 = Square::from_index(6 + back_rank * 8).unwrap();
             let h1 = Square::from_index(7 + back_rank * 8).unwrap();
-            
-            if !state.all_pieces().has_piece(f1.index()) && 
-               !state.all_pieces().has_piece(g1.index()) &&
-               matches!(state.piece_at(h1), Some((rook_color, PieceType::Rook)) if rook_color == color) &&
-               !state.is_square_attacked(f1, color.opposite()) &&
-               !state.is_square_attacked(g1, color.opposite()) &&
-               !state.is_square_attacked(king_sq, color.opposite()) {
+
+            if !state.all_pieces().has_piece(f1.index())
+                && !state.all_pieces().has_piece(g1.index())
+                && matches!(state.piece_at(h1), Some((rook_color, PieceType::Rook)) if rook_color == color)
+                && !state.is_square_attacked(f1, color.opposite())
+                && !state.is_square_attacked(g1, color.opposite())
+                && !state.is_square_attacked(king_sq, color.opposite())
+            {
                 let mut mv = Move::new(king_sq, g1, PieceType::King);
                 mv.is_castle = true;
                 moves.push(mv);
             }
         }
-        
+
         if queenside {
             let b1 = Square::from_index(1 + back_rank * 8).unwrap();
             let c1 = Square::from_index(2 + back_rank * 8).unwrap();
             let d1 = Square::from_index(3 + back_rank * 8).unwrap();
-            
-            if !state.all_pieces().has_piece(b1.index()) && 
-               !state.all_pieces().has_piece(c1.index()) &&
-               !state.all_pieces().has_piece(d1.index()) &&
-               matches!(state.piece_at(Square::from_index(back_rank * 8).unwrap()), Some((rook_color, PieceType::Rook)) if rook_color == color) &&
-               !state.is_square_attacked(c1, color.opposite()) &&
-               !state.is_square_attacked(d1, color.opposite()) &&
-               !state.is_square_attacked(king_sq, color.opposite()) {
+
+            if !state.all_pieces().has_piece(b1.index())
+                && !state.all_pieces().has_piece(c1.index())
+                && !state.all_pieces().has_piece(d1.index())
+                && matches!(state.piece_at(Square::from_index(back_rank * 8).unwrap()), Some((rook_color, PieceType::Rook)) if rook_color == color)
+                && !state.is_square_attacked(c1, color.opposite())
+                && !state.is_square_attacked(d1, color.opposite())
+                && !state.is_square_attacked(king_sq, color.opposite())
+            {
                 let mut mv = Move::new(king_sq, c1, PieceType::King);
                 mv.is_castle = true;
                 moves.push(mv);
             }
         }
     }
-    
+
     fn is_legal_move(&self, state: &GameState, mv: &Move) -> bool {
         // Try making the move and see if king is in check
         match GameState::make_move(state, mv) {
             Ok(new_state) => {
                 let moved_side = state.side_to_move;
-                !new_state.is_square_attacked(new_state.king_square(moved_side), moved_side.opposite())
+                !new_state
+                    .is_square_attacked(new_state.king_square(moved_side), moved_side.opposite())
             }
             Err(_) => false,
         }

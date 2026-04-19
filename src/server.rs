@@ -2,6 +2,7 @@ use crate::ai::evaluation::Personality;
 use crate::ai::search::AI;
 use crate::engine::bitboard::Square;
 use crate::engine::move_gen::{Color, Move, MoveGenerator, PieceType};
+use crate::integrations::lichess;
 use crate::state::game_state::GameState;
 use std::collections::HashMap;
 use std::env;
@@ -33,6 +34,26 @@ pub fn run() -> io::Result<()> {
     }
 
     Ok(())
+}
+
+fn uci_to_move(state: &GameState, generator: &MoveGenerator, uci: &str) -> Result<Move, String> {
+    if uci.len() < 4 {
+        return Err("Invalid UCI move".to_string());
+    }
+
+    let from = coord_to_square(&uci[0..2])?;
+    let to = coord_to_square(&uci[2..4])?;
+    let promotion = if uci.len() == 5 {
+        Some(promotion_from_code(&uci[4..5])?)
+    } else {
+        None
+    };
+
+    generator
+        .generate_moves(state)
+        .into_iter()
+        .find(|mv| mv.from == from && mv.to == to && mv.promotion == promotion)
+        .ok_or_else(|| "UCI move not legal in current position".to_string())
 }
 
 fn handle_connection(mut stream: TcpStream) -> io::Result<()> {
@@ -81,7 +102,12 @@ fn handle_api(stream: &mut TcpStream, path: &str, query: &str) -> io::Result<()>
         "/api/new" => {
             let state = GameState::initial();
             let body = snapshot_json(&state, &generator, None);
-            write_response(stream, "200 OK", "application/json; charset=utf-8", body.as_bytes())
+            write_response(
+                stream,
+                "200 OK",
+                "application/json; charset=utf-8",
+                body.as_bytes(),
+            )
         }
         "/api/state" => {
             let Some(fen) = params.get("fen") else {
@@ -91,7 +117,12 @@ fn handle_api(stream: &mut TcpStream, path: &str, query: &str) -> io::Result<()>
             match GameState::from_fen(fen) {
                 Ok(state) => {
                     let body = snapshot_json(&state, &generator, None);
-                    write_response(stream, "200 OK", "application/json; charset=utf-8", body.as_bytes())
+                    write_response(
+                        stream,
+                        "200 OK",
+                        "application/json; charset=utf-8",
+                        body.as_bytes(),
+                    )
                 }
                 Err(error) => api_error(stream, &error),
             }
@@ -120,7 +151,12 @@ fn handle_api(stream: &mut TcpStream, path: &str, query: &str) -> io::Result<()>
                 .collect();
 
             let body = format!("{{\"moves\":{}}}", moves_json(&moves));
-            write_response(stream, "200 OK", "application/json; charset=utf-8", body.as_bytes())
+            write_response(
+                stream,
+                "200 OK",
+                "application/json; charset=utf-8",
+                body.as_bytes(),
+            )
         }
         "/api/move" => {
             let Some(fen) = params.get("fen") else {
@@ -171,7 +207,12 @@ fn handle_api(stream: &mut TcpStream, path: &str, query: &str) -> io::Result<()>
                         json_string(&notation),
                         snapshot
                     );
-                    write_response(stream, "200 OK", "application/json; charset=utf-8", body.as_bytes())
+                    write_response(
+                        stream,
+                        "200 OK",
+                        "application/json; charset=utf-8",
+                        body.as_bytes(),
+                    )
                 }
                 Err(error) => api_error(stream, &error),
             }
@@ -203,7 +244,8 @@ fn handle_api(stream: &mut TcpStream, path: &str, query: &str) -> io::Result<()>
                 .clamp(200, 3000);
 
             let mut ai = AI::new(personality);
-            let search_result = ai.find_best_move(&state, std::time::Duration::from_millis(thinking_ms));
+            let search_result =
+                ai.find_best_move(&state, std::time::Duration::from_millis(thinking_ms));
             let Some(best_move) = search_result.best_move else {
                 return api_error(stream, "No legal AI move");
             };
@@ -219,7 +261,87 @@ fn handle_api(stream: &mut TcpStream, path: &str, query: &str) -> io::Result<()>
                         search_result.evaluation,
                         search_result.depth_reached
                     );
-                    write_response(stream, "200 OK", "application/json; charset=utf-8", body.as_bytes())
+                    write_response(
+                        stream,
+                        "200 OK",
+                        "application/json; charset=utf-8",
+                        body.as_bytes(),
+                    )
+                }
+                Err(error) => api_error(stream, &error),
+            }
+        }
+        "/api/smart-move" => {
+            let Some(fen) = params.get("fen") else {
+                return api_error(stream, "Missing fen parameter");
+            };
+
+            let state = match GameState::from_fen(fen) {
+                Ok(state) => state,
+                Err(error) => return api_error(stream, &error),
+            };
+
+            let personality = match personality_from_code(
+                params
+                    .get("personality")
+                    .map(String::as_str)
+                    .unwrap_or("aggressive"),
+            ) {
+                Ok(personality) => personality,
+                Err(error) => return api_error(stream, &error),
+            };
+
+            let thinking_ms = params
+                .get("ms")
+                .and_then(|value| value.parse::<u64>().ok())
+                .unwrap_or(700)
+                .clamp(200, 3000);
+
+            if let Ok(Some(uci)) = lichess::best_opening_uci(fen) {
+                if let Ok(candidate_move) = uci_to_move(&state, &generator, &uci) {
+                    if let Ok(next_state) = GameState::make_move(&state, &candidate_move) {
+                        let notation = move_notation(&candidate_move, &next_state, &generator);
+                        let snapshot =
+                            snapshot_json(&next_state, &generator, Some(&candidate_move));
+                        let body = format!(
+                            "{{\"source\":\"lichess_opening\",\"moveNotation\":{},\"snapshot\":{},\"evaluation\":null,\"depth\":null}}",
+                            json_string(&notation),
+                            snapshot
+                        );
+                        return write_response(
+                            stream,
+                            "200 OK",
+                            "application/json; charset=utf-8",
+                            body.as_bytes(),
+                        );
+                    }
+                }
+            }
+
+            let mut ai = AI::new(personality);
+            let search_result =
+                ai.find_best_move(&state, std::time::Duration::from_millis(thinking_ms));
+            let Some(best_move) = search_result.best_move else {
+                return api_error(stream, "No legal AI move");
+            };
+
+            match GameState::make_move(&state, &best_move) {
+                Ok(next_state) => {
+                    let notation = move_notation(&best_move, &next_state, &generator);
+                    let snapshot = snapshot_json(&next_state, &generator, Some(&best_move));
+                    let body = format!(
+                        "{{\"source\":\"chessq_ai\",\"moveNotation\":{},\"snapshot\":{},\"evaluation\":{},\"depth\":{}}}",
+                        json_string(&notation),
+                        snapshot,
+                        search_result.evaluation,
+                        search_result.depth_reached
+                    );
+                    write_response(
+                        stream,
+                        "200 OK",
+                        "application/json; charset=utf-8",
+                        body.as_bytes(),
+                    )
                 }
                 Err(error) => api_error(stream, &error),
             }
@@ -252,7 +374,11 @@ fn web_root() -> std::path::PathBuf {
 
 fn serve_static(stream: &mut TcpStream, path: &str) -> io::Result<()> {
     let web_root = web_root();
-    let relative = if path == "/" { "index.html" } else { path.trim_start_matches('/') };
+    let relative = if path == "/" {
+        "index.html"
+    } else {
+        path.trim_start_matches('/')
+    };
 
     if relative.contains("..") || relative.contains('\\') {
         return write_response(
