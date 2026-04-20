@@ -4,12 +4,12 @@
 // === Configuration ===
 const CONFIG = {
   API_BASE: '/api',
-  GIFT_TO_CASH_RATE: 100, // 100 gifts = $1.00
+  GIFT_TO_CASH_RATE: 5000, // 5000 gifts = $1.00
   HOLDING_PERIOD_DAYS: 45,
   CHECKMATE_CASH: 5.00,
-  DRAW_GIFTS: 50,
-  WIN_GIFTS: 100,
-  LOSS_GIFTS: 25
+  DRAW_GIFTS: 2,
+  WIN_GIFTS: 10,
+  LOSS_GIFTS: 0
 };
 
 // === Game State ===
@@ -29,27 +29,31 @@ let gameState = {
   gameActive: false,
   playingAgainstAI: false,
   playerColor: 'w',
-  aiPersonality: 'aggressive'
+  aiPersonality: 'aggressive',
+  lang: 'en',
+  modeStyle: 'adult'
 };
 
 // === Economy State ===
 let economyState = {
-  availableBalance: 127.50,
-  giftsEarned: 450,
-  pendingBalance: 85.00,
-  daysRemaining: 32,
-  level: 12,
-  giftsToNextLevel: 1000,
-  currentGifts: 650,
-  eloRating: 1720,
-  lastEloChange: 15
+  availableBalance: 0,
+  giftsEarned: 0,
+  pendingBalance: 0,
+  daysRemaining: 45,
+  level: 1,
+  giftsToNextLevel: 100,
+  currentGifts: 0,
+  eloRating: 1500,
+  lastEloChange: 0
 };
 
 // === Player Profile ===
 let playerProfile = {
-  username: 'Guest',
+  username: 'Player',
   email: '',
-  avatar: 'YO',
+  avatar: 'PL',
+  country: '',
+  isPremium: false,
   gamesPlayed: 0,
   gamesWon: 0,
   gamesLost: 0,
@@ -109,6 +113,18 @@ function showProfileModal() {
             <label>Avatar (2 letters)</label>
             <input type="text" id="profileAvatar" value="${playerProfile.avatar}" maxlength="2">
           </div>
+          <div class="form-group">
+            <label>Country (Required)</label>
+            <select id="profileCountry" required>
+              <option value="" disabled ${playerProfile.country ? '' : 'selected'}>Select your country</option>
+              <option value="NP" ${playerProfile.country === 'NP' ? 'selected' : ''}>Nepal</option>
+              <option value="IN" ${playerProfile.country === 'IN' ? 'selected' : ''}>India</option>
+              <option value="US" ${playerProfile.country === 'US' ? 'selected' : ''}>United States</option>
+              <option value="GB" ${playerProfile.country === 'GB' ? 'selected' : ''}>United Kingdom</option>
+              <option value="AU" ${playerProfile.country === 'AU' ? 'selected' : ''}>Australia</option>
+              <option value="OTHER" ${playerProfile.country === 'OTHER' ? 'selected' : ''}>Other</option>
+            </select>
+          </div>
         </div>
         
         <div class="profile-stats">
@@ -156,10 +172,17 @@ function saveProfileChanges() {
   const username = document.getElementById('profileUsername').value.trim();
   const email = document.getElementById('profileEmail').value.trim();
   const avatar = document.getElementById('profileAvatar').value.trim().toUpperCase();
+  const country = document.getElementById('profileCountry').value;
+  
+  if (!country) {
+    showNotification('Error', 'Please select a country to save your profile.');
+    return;
+  }
   
   if (username) playerProfile.username = username;
   if (avatar.length === 2) playerProfile.avatar = avatar;
   playerProfile.email = email;
+  playerProfile.country = country;
   
   saveProfile();
   updateProfileDisplay();
@@ -200,13 +223,13 @@ document.addEventListener('DOMContentLoaded', () => {
   updateEconomyDisplay();
   updateRankingDisplay();
   updateProfileDisplay();
+  
+  // Start incoming challenge simulator
+  startRandomChallengeTimer();
 });
 
 function initializeGame() {
-  console.log('ChessQ Premium Play initialized');
-  console.log('Welcome,', playerProfile.username);
-  
-  // Show mode selection by default
+  console.log('ChessQ initialized');
   showModeSelection();
 }
 
@@ -219,9 +242,15 @@ function updateProfileDisplay() {
   }
   
   // Update player info in game
-  const playerNameEl = document.querySelector('.player-bottom .player-name');
-  if (playerNameEl) {
-    playerNameEl.textContent = playerProfile.username;
+  const playerBottomName = document.querySelector('.player-bottom .player-name');
+  if (playerBottomName) {
+    playerBottomName.textContent = playerProfile.username + (playerProfile.isPremium ? ' [PRO]' : '');
+    playerBottomName.style.color = playerProfile.isPremium ? 'var(--green-neon)' : 'white';
+  }
+  
+  const playerTopName = document.querySelector('.player-top .player-name');
+  if (playerTopName) {
+    playerTopName.textContent = gameState.playingAgainstAI ? 'ChessQ AI' : 'Opponent';
   }
   
   const playerAvatarEl = document.querySelector('.player-bottom .player-avatar');
@@ -246,6 +275,105 @@ function showModeSelection() {
 
 // === Event Listeners ===
 function setupEventListeners() {
+  // Mobile Navigation Toggle
+  const mobileToggle = document.querySelector('.mobile-toggle');
+  const navLinks = document.querySelector('.nav-links');
+  if (mobileToggle && navLinks) {
+    mobileToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+    });
+  }
+
+  // Localization & Mode Toggles
+  document.getElementById('langToggleBtn')?.addEventListener('click', toggleLanguage);
+  document.getElementById('modeToggleBtn')?.addEventListener('click', toggleModeStyle);
+  
+  // SaaS UI Toggles
+  const pricingModal = document.getElementById('pricingModal');
+  const authModal = document.getElementById('authModal');
+  const checkoutModal = document.getElementById('checkoutModal');
+  
+  document.getElementById('upgradeBtn')?.addEventListener('click', () => {
+    const pricingModal = document.getElementById('pricingModal');
+    if (pricingModal) {
+      pricingModal.classList.remove('hidden');
+    }
+  });
+  
+  document.getElementById('closePricing')?.addEventListener('click', () => {
+    const pricingModal = document.getElementById('pricingModal');
+    if (pricingModal) {
+      pricingModal.classList.add('hidden');
+    }
+  });
+  
+  document.getElementById('pricingOverlay')?.addEventListener('click', () => {
+    const pricingModal = document.getElementById('pricingModal');
+    if (pricingModal) {
+      pricingModal.classList.add('hidden');
+    }
+  });
+  
+  document.getElementById('closeAuth')?.addEventListener('click', () => {
+    const authModal = document.getElementById('authModal');
+    if (authModal) {
+      authModal.classList.add('hidden');
+    }
+  });
+  
+  document.getElementById('authOverlay')?.addEventListener('click', () => {
+    const authModal = document.getElementById('authModal');
+    if (authModal) {
+      authModal.classList.add('hidden');
+    }
+  });
+  
+  // Checkout Flow
+  document.getElementById('payPremiumBtn')?.addEventListener('click', () => openCheckout('Premium Tier', '$4.99/mo'));
+  document.getElementById('payProBtn')?.addEventListener('click', () => openCheckout('Pro Tier', '$9.99/mo'));
+  
+  document.getElementById('closeCheckout')?.addEventListener('click', () => {
+    const checkoutModal = document.getElementById('checkoutModal');
+    if (checkoutModal) {
+      checkoutModal.classList.add('hidden');
+    }
+  });
+  
+  document.getElementById('checkoutOverlay')?.addEventListener('click', () => {
+    const checkoutModal = document.getElementById('checkoutModal');
+    if (checkoutModal) {
+      checkoutModal.classList.add('hidden');
+    }
+  });
+  
+  document.getElementById('completePaymentBtn')?.addEventListener('click', processPayment);
+  
+  // Deep Review Button
+  document.getElementById('deepReviewBtn')?.addEventListener('click', () => {
+    if (!playerProfile.isPremium) {
+      showNotification('Premium Feature', 'Deep Review is a Pro feature. Please upgrade to unlock.');
+      const pricingModal = document.getElementById('pricingModal');
+      if (pricingModal) {
+        pricingModal.classList.remove('hidden');
+        pricingModal.style.display = 'flex';
+      }
+      return;
+    }
+    
+    const modal = document.getElementById('resultModal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
+    document.getElementById('analysisSection')?.scrollIntoView({ behavior: 'smooth' });
+    showNotification('Deep Review Initiated', 'Engine calculating optimal GM paths (Pro Feature)...');
+    
+    // Simulate deep review
+    setTimeout(() => {
+      showNotification('Analysis Complete', 'You missed a forced mate in 3 on move 12.');
+    }, 2500);
+  });
+
   // Mode cards
   document.querySelectorAll('.mode-card').forEach(card => {
     card.addEventListener('click', () => {
@@ -316,6 +444,19 @@ function setupEventListeners() {
   document.getElementById('drawBtn')?.addEventListener('click', offerDraw);
   document.getElementById('undoBtn')?.addEventListener('click', requestUndo);
   
+  document.getElementById('backToMenuBtn')?.addEventListener('click', () => {
+    gameState.gameActive = false;
+    if (gameState.clockInterval) clearInterval(gameState.clockInterval);
+    showModeSelection();
+  });
+  
+  document.getElementById('closeLobby')?.addEventListener('click', closeLobbyModal);
+  document.getElementById('lobbyOverlay')?.addEventListener('click', closeLobbyModal);
+  document.getElementById('lobbyCopyLink')?.addEventListener('click', () => {
+    navigator.clipboard.writeText(document.getElementById('lobbyShareLink').value);
+    showNotification('Copied', 'Link copied to clipboard!');
+  });
+  
   // Chat
   document.getElementById('chatToggle')?.addEventListener('click', toggleChat);
   document.getElementById('chatClose')?.addEventListener('click', toggleChat);
@@ -352,6 +493,27 @@ function setupEventListeners() {
 }
 
 // === Mode Selection Handler ===
+function toggleLanguage() {
+  gameState.lang = gameState.lang === 'en' ? 'ne' : 'en';
+  const btn = document.getElementById('langToggleBtn');
+  if (btn) btn.textContent = gameState.lang === 'en' ? '🇳🇵 NE' : '🇺🇸 EN';
+  if (typeof translateUI === 'function') translateUI(gameState.lang);
+}
+
+function toggleModeStyle() {
+  gameState.modeStyle = gameState.modeStyle === 'adult' ? 'kids' : 'adult';
+  
+  if (gameState.modeStyle === 'kids') {
+    document.body.classList.add('theme-kids');
+    gameState.aiPersonality = 'defensive';
+  } else {
+    document.body.classList.remove('theme-kids');
+    gameState.aiPersonality = 'aggressive';
+  }
+  
+  if (typeof translateUI === 'function') translateUI(gameState.lang);
+}
+
 function handleModeSelection(mode) {
   gameState.mode = mode;
   
@@ -377,6 +539,12 @@ function closeOpponentModal() {
 }
 
 function handleOpponentSelection(opponent) {
+  if (opponent === 'human' && gameState.modeStyle === 'kids') {
+    showNotification('Restricted', 'Kids cannot play online humans. Upgrade to Talent Account first!');
+    closeOpponentModal();
+    return;
+  }
+
   closeOpponentModal();
   
   if (opponent === 'ai') {
@@ -386,10 +554,27 @@ function handleOpponentSelection(opponent) {
   } else {
     gameState.playingAgainstAI = false;
     gameState.playerColor = 'w'; // Default to white for human vs human
-    showNotification('Human Opponent', 'Share the game link with your friend!');
-    // Show time control selection
-    elements.timeControlModal.classList.remove('hidden');
+    showLobbyModal();
   }
+}
+
+function showLobbyModal() {
+  const lobby = document.getElementById('lobbyModal');
+  if (lobby) lobby.classList.remove('hidden');
+  
+  // Simulate opponent joining after 3.5 seconds
+  setTimeout(() => {
+    if (lobby && !lobby.classList.contains('hidden')) {
+      closeLobbyModal();
+      elements.timeControlModal.classList.remove('hidden');
+      showNotification('Opponent Joined!', 'Select a time control.');
+    }
+  }, 3500);
+}
+
+function closeLobbyModal() {
+  const lobby = document.getElementById('lobbyModal');
+  if (lobby) lobby.classList.add('hidden');
 }
 
 function showColorModal() {
@@ -1199,8 +1384,71 @@ function showNotification(title, message) {
   
   setTimeout(() => {
     elements.notificationToast.classList.add('hidden');
-  }, 5000);
+  }, 3000);
 }
+
+// === SaaS Features ===
+function openCheckout(planName, price) {
+  const pricingModal = document.getElementById('pricingModal');
+  const checkoutModal = document.getElementById('checkoutModal');
+  
+  if (pricingModal) {
+    pricingModal.classList.add('hidden');
+  }
+  
+  document.getElementById('checkoutPlanName').textContent = planName;
+  document.getElementById('checkoutPlanPrice').textContent = price;
+  
+  if (checkoutModal) {
+    checkoutModal.classList.remove('hidden');
+  }
+}
+
+function processPayment() {
+  const btnText = document.getElementById('paymentBtnText');
+  const spinner = document.getElementById('paymentSpinner');
+  const checkoutModal = document.getElementById('checkoutModal');
+  
+  if (btnText) btnText.textContent = 'Processing...';
+  if (spinner) spinner.classList.remove('hidden');
+  
+  setTimeout(() => {
+    if (btnText) btnText.textContent = 'Complete Payment';
+    if (spinner) spinner.classList.add('hidden');
+    if (checkoutModal) checkoutModal.classList.add('hidden');
+    
+    playerProfile.isPremium = true;
+    saveProfile();
+    updateProfileDisplay();
+    
+    showNotification('Payment Successful', 'Welcome to ChessQ Premium! All Pro features unlocked.');
+  }, 2000);
+}
+
+// === Incoming Challenge System ===
+function startRandomChallengeTimer() {
+  setTimeout(() => {
+    if (!gameState.gameActive) {
+      const challengeModal = document.getElementById('challengeModal');
+      if (challengeModal) {
+        challengeModal.classList.remove('hidden');
+      }
+    }
+  }, 8000); // 8 seconds after load
+}
+
+document.getElementById('acceptChallengeBtn')?.addEventListener('click', () => {
+  document.getElementById('challengeModal').classList.add('hidden');
+  gameState.playingAgainstAI = false;
+  gameState.aiLevel = null;
+  gameState.modeStyle = 'adult';
+  startGame(3, 0); // Start a 3|0 Blitz game automatically
+  showNotification('Challenge Accepted', 'Starting match against GrandMaster_Alex...');
+});
+
+document.getElementById('declineChallengeBtn')?.addEventListener('click', () => {
+  document.getElementById('challengeModal').classList.add('hidden');
+});
 
 // === Game Actions ===
 function resignGame() {
@@ -1228,17 +1476,10 @@ function handleWithdraw() {
 // === Export for debugging ===
 window.ChessQ = {
   gameState,
-  economyState,
-  playerProfile,
-  showNotification,
-  startGame,
-  showProfileModal,
-  saveProfile,
-  loadProfile
+  playerProfile
 };
 
 // Make functions global for modal buttons
 window.saveProfileChanges = saveProfileChanges;
 
-console.log('ChessQ Premium Play loaded ✓');
-console.log('Profile:', playerProfile.username);
+console.log('ChessQ loaded successfully');

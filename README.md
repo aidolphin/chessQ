@@ -2,76 +2,39 @@
 
 <div align="center">
 
-**A high-performance chess engine and web application built with Rust and modern web technologies**
+**A modern chess application built with Rust and vanilla JavaScript**
 
 [![Rust](https://img.shields.io/badge/Rust-1.70+-orange.svg)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[Features](#-features) • [Quick Start](#-quick-start) • [Architecture](#-architecture) • [API](#-api) • [Contributing](#-contributing)
+[Features](#features) • [Quick Start](#quick-start) • [Documentation](#documentation) • [Contributing](#contributing)
 
 </div>
 
 ---
 
-## 🎯 Overview
+## Overview
 
-ChessQ is a tournament-strength chess engine (2000+ ELO) with a beautiful web interface. Built with Rust for performance and safety, it features advanced chess algorithms including bitboard representation, magic bitboards, transposition tables, and quiescence search.
+ChessQ is a full-featured chess application combining a Rust-powered chess engine with a modern web interface. Play against an AI opponent, practice with interactive lessons, or challenge friends locally.
 
-### ✨ Highlights
+### Key Features
 
-- 🚀 **Blazing Fast**: Rust-powered engine with optimized move generation
-- 🧠 **Smart AI**: Multiple personalities (aggressive, defensive, chaotic)
-- 🎨 **Beautiful UI**: Premium black & green theme with 3D-style pieces
-- 📱 **Fully Responsive**: Works seamlessly on desktop, tablet, and mobile
-- 🎓 **Learn Chess**: Interactive tutorials with live board demonstrations
-- 🔔 **Real-time Notifications**: Stay updated on game events
-
----
-
-## 🎮 Features
-
-### Chess Engine
-
-- **Advanced Move Generation**: Bitboard-based with magic bitboards for sliding pieces
-- **Transposition Tables**: Zobrist hashing for 10-100x speedup
-- **Quiescence Search**: Tactical accuracy of 95%+
-- **Enhanced Evaluation**: Mobility, passed pawns, pawn structure analysis
-- **Full Rules Support**: Castling, en passant, pawn promotion, check/checkmate/stalemate
-
-### Game Modes
-
-- ♟️ **Standard Chess**: Classic 2-player with time controls (Bullet, Blitz, Rapid, Classical)
-- 🤖 **Play vs AI**: Choose your color and AI personality
-- 🎓 **Learning Mode**: 9 interactive chapters teaching chess fundamentals
-- 🔗 **Shareable Games**: Generate links to share board positions
-
-### Time Controls
-
-| Mode | Time | Increment |
-|------|------|-----------|
-| ⚡ Bullet | 1-2 min | 0-1 sec |
-| 🔥 Blitz | 3-5 min | 0-2 sec |
-| ⏱️ Rapid | 10-30 min | 0-10 sec |
-| 📅 Daily | 1-7 days | - |
-
-### User Experience
-
-- 👤 **Local Profiles**: Username, avatar, game statistics
-- 📊 **ELO Rating System**: Track your skill progression
-- 🎁 **Economy System**: Earn rewards for wins (frontend simulation)
-- 💬 **In-game Chat**: Communicate with opponents
-- 📜 **Move History**: Review every move of your game
-- 🔔 **Notifications**: Game results and updates
+- 🎮 **Play Chess**: Standard chess with multiple time controls
+- 🤖 **AI Opponent**: Play against computer with different personalities
+- 🎓 **Learn Chess**: 9 interactive chapters teaching fundamentals
+- ⏱️ **Time Controls**: Bullet, Blitz, Rapid, and Classical modes
+- 📊 **Track Progress**: Local statistics and ELO rating system
+- 📱 **Responsive Design**: Works on desktop, tablet, and mobile
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
 - [Rust](https://www.rust-lang.org/tools/install) 1.70 or higher
-- A modern web browser
+- Modern web browser (Chrome, Firefox, Safari, Edge)
 
 ### Installation
 
@@ -84,131 +47,115 @@ cd chessQ
 cargo run --release
 ```
 
-The server will start on `http://127.0.0.1:4173`
+The application will start on `http://127.0.0.1:4173`
 
-### Optional: CLI Mode
+### First Game
 
-```bash
-cargo run --bin chessq-cli
-```
+1. Open `http://127.0.0.1:4173` in your browser
+2. Click **"Standard Chess"**
+3. Choose **"Play Against AI"**
+4. Select your color (White/Black/Random)
+5. Pick a time control
+6. Click **"Start Game"** and play!
 
 ---
 
-## 🏗️ Architecture
+## Features
 
-### Project Structure
+### Chess Engine
+
+- **Bitboard Representation**: Efficient board state management
+- **Magic Bitboards**: Fast move generation for sliding pieces
+- **Full Rules**: Castling, en passant, promotion, check/checkmate
+- **FEN Support**: Import/export positions
+
+### AI System
+
+- **Alpha-Beta Search**: Intelligent move selection
+- **Transposition Table**: Zobrist hashing for performance
+- **Quiescence Search**: Tactical accuracy
+- **Three Personalities**:
+  - Aggressive: Attacks and sacrifices
+  - Defensive: Solid and safe play
+  - Chaotic: Unpredictable moves
+
+### Game Modes
+
+- **Standard Chess**: Classic 2-player game
+- **vs AI**: Play against computer opponent
+- **Learning Mode**: 9 interactive tutorials
+- **Time Controls**: Bullet (1-2min), Blitz (3-5min), Rapid (10-30min), Classical (30min+)
+
+### User Interface
+
+- **Premium Design**: Black & green theme with 3D-style pieces
+- **Board Flip**: Automatic orientation for black player
+- **Move Highlighting**: Visual feedback for legal moves
+- **Move History**: Review all moves in notation
+- **Notifications**: Game events and updates
+- **Profile System**: Track your statistics locally
+
+### Learning Mode
+
+9 interactive chapters covering:
+1. Chess Basics
+2. The Pawn
+3. The Knight
+4. The Bishop
+5. The Rook
+6. The Queen
+7. The King
+8. Checkmate Patterns
+9. Tactics
+
+---
+
+## Project Structure
 
 ```
 chessQ/
 ├── src/
-│   ├── engine/          # Chess engine core
-│   │   ├── bitboard.rs  # Bitboard representation
-│   │   ├── magic.rs     # Magic bitboards for sliding pieces
-│   │   ├── move_gen.rs  # Legal move generation
-│   │   ├── transposition.rs  # Transposition table
-│   │   └── zobrist.rs   # Zobrist hashing
-│   ├── ai/              # AI opponent
-│   │   ├── search.rs    # Alpha-beta search with pruning
-│   │   └── evaluation.rs # Position evaluation
+│   ├── engine/          # Chess engine (bitboards, move generation)
+│   ├── ai/              # AI opponent (search, evaluation)
 │   ├── state/           # Game state management
-│   │   └── game_state.rs
-│   ├── bin/             # Binary executables
-│   │   └── chessq-cli.rs # Terminal interface
-│   ├── server.rs        # HTTP server & API
-│   └── main.rs          # Entry point
-├── web/                 # Frontend application
-│   ├── play.html        # Main chess interface
-│   ├── play.js          # Game logic & API integration
+│   ├── server.rs        # HTTP server and API
+│   └── main.rs          # Application entry point
+├── web/
+│   ├── play.html        # Main game interface
+│   ├── play.js          # Game logic and UI
 │   ├── play.css         # Styling
 │   ├── learn.js         # Learning mode
-│   ├── landing-pro.html # Landing page
-│   └── ...
-├── tests/               # Test suite
-└── docs/                # Documentation
+│   └── landing-pro.html # Landing page
+├── tests/
+│   ├── engine_tests.rs      # Engine unit tests
+│   ├── integration_tests.rs # API integration tests
+│   └── e2e_tests.rs         # End-to-end tests
+└── docs/
+    └── DOCUMENTATION.md     # Technical documentation
 ```
-
-### Technology Stack
-
-**Backend:**
-- 🦀 Rust - Systems programming language
-- 🌐 HTTP Server - Custom lightweight server
-- 🎯 FEN Notation - Standard chess position format
-
-**Frontend:**
-- 📄 HTML5 - Semantic markup
-- 🎨 CSS3 - Modern styling with gradients & animations
-- ⚡ Vanilla JavaScript - No framework dependencies
-- 🎭 Unicode Chess Pieces - Native rendering
 
 ---
 
-## 🔌 API
+## API Endpoints
 
-### Endpoints
-
-#### `GET /api/new`
+### `GET /api/new`
 Create a new game with starting position.
 
-**Response:**
-```json
-{
-  "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-  "board": [...],
-  "status": "ongoing",
-  "turn": "w"
-}
-```
-
-#### `GET /api/state?fen={fen}`
+### `GET /api/state?fen={fen}`
 Load a board state from FEN notation.
 
-**Parameters:**
-- `fen` - FEN string representing board position
+### `GET /api/legal-moves?fen={fen}&from={square}`
+Get legal moves for a piece at the specified square.
 
-#### `GET /api/legal-moves?fen={fen}&from={square}`
-Get legal moves for a piece.
-
-**Parameters:**
-- `fen` - Current board position
-- `from` - Square in algebraic notation (e.g., "e2")
-
-**Response:**
-```json
-{
-  "moves": ["e4", "e3"]
-}
-```
-
-#### `GET /api/move?fen={fen}&from={from}&to={to}&promotion={piece}`
+### `GET /api/move?fen={fen}&from={from}&to={to}`
 Apply a move to the board.
 
-**Parameters:**
-- `fen` - Current position
-- `from` - Source square
-- `to` - Destination square
-- `promotion` - (Optional) Piece to promote to (q/r/b/n)
-
-#### `GET /api/ai-move?fen={fen}&personality={style}&ms={time}`
-Request an AI move.
-
-**Parameters:**
-- `fen` - Current position
-- `personality` - AI style: `aggressive`, `defensive`, or `chaotic`
-- `ms` - Time limit in milliseconds (default: 700)
-
-**Response:**
-```json
-{
-  "from": "e7",
-  "to": "e5",
-  "fen": "...",
-  "status": "ongoing"
-}
-```
+### `GET /api/ai-move?fen={fen}&personality={style}&ms={time}`
+Request an AI move with specified personality and time limit.
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run all tests
@@ -216,150 +163,106 @@ cargo test
 
 # Run specific test suite
 cargo test --test engine_tests
-
-# Run with output
-cargo test -- --nocapture
+cargo test --test integration_tests -- --ignored
+cargo test --test e2e_tests
 
 # Run benchmarks
 cargo bench
 ```
 
-### Test Coverage
+---
 
-- ✅ Perft validation (move generation correctness)
-- ✅ Tactical positions (mate in 1, 2, 3)
-- ✅ Edge cases (castling, en passant, promotion, stalemate)
-- ✅ Transposition table hit rates
-- ✅ Quiescence search accuracy
+## Documentation
+
+- **[Quick Start Guide](QUICKSTART.md)** - Get started in 5 minutes
+- **[Technical Documentation](docs/DOCUMENTATION.md)** - Architecture and implementation details
+- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute
+- **[Roadmap](ROADMAP.md)** - Future development plans
+- **[Changelog](CHANGELOG.md)** - Version history
 
 ---
 
-## 🎨 UI Features
+## Development
 
-### Premium Design
+### Running in Development Mode
 
-- **Black & Green Theme**: Professional color scheme with neon accents
-- **3D-Style Pieces**: Shadows, strokes, and glow effects
-- **Animated Board**: Pulsing highlights and smooth transitions
-- **Coordinate Labels**: A-H and 1-8 labels on board edges
-- **Responsive Layout**: Adapts to all screen sizes
+```bash
+# Start server with auto-reload
+cargo watch -x run
 
-### Accessibility
+# Run tests on file changes
+cargo watch -x test
+```
 
-- High contrast colors for visibility
-- Keyboard navigation support
-- Screen reader friendly
-- Touch-optimized for mobile
+### Code Quality
 
----
+```bash
+# Format code
+cargo fmt
 
-## 📚 Learning Mode
+# Lint code
+cargo clippy
 
-ChessQ includes 9 interactive chapters:
-
-1. **Chess Basics** - Board, pieces, and objectives
-2. **The Pawn** - Movement, capture, promotion
-3. **The Knight** - L-shaped moves and tactics
-4. **The Bishop** - Diagonal control
-5. **The Rook** - Files and ranks
-6. **The Queen** - Most powerful piece
-7. **The King** - Movement and safety
-8. **Checkmate Patterns** - Common mating techniques
-9. **Tactics** - Forks, pins, skewers
-
-Each chapter includes:
-- Live chess board demonstrations
-- Step-by-step explanations
-- Interactive quizzes with feedback
-- Highlighted squares showing key concepts
+# Check without building
+cargo check
+```
 
 ---
 
-## 🤝 Contributing
-
-We welcome contributions! Here's how you can help:
-
-### Ways to Contribute
-
-- 🐛 Report bugs and issues
-- 💡 Suggest new features
-- 📝 Improve documentation
-- 🔧 Submit pull requests
-- ⭐ Star the repository
-
-### Development Setup
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes
-4. Run tests: `cargo test`
-5. Commit: `git commit -m 'Add amazing feature'`
-6. Push: `git push origin feature/amazing-feature`
-7. Open a Pull Request
-
-### Code Style
-
-- Follow Rust conventions (`cargo fmt`)
-- Run clippy: `cargo clippy`
-- Add tests for new features
-- Update documentation
-
----
-
-## 🔮 Roadmap
-
-### Current Limitations
-
-⚠️ **Transparency Notice**: ChessQ is honest about what's implemented and what's planned.
-
-**Not Yet Implemented:**
-- ❌ Real-time multiplayer (WebSocket-based)
-- ❌ Server-side account system
-- ❌ Real money economy (current system is frontend simulation)
-- ❌ 4-player chess mode
-- ❌ Payment processing
-
-### Planned Features
-
-- [ ] WebSocket multiplayer
-- [ ] User authentication & profiles
-- [ ] Tournament system
-- [ ] Puzzle database
-- [ ] Opening book
-- [ ] Game analysis with engine evaluation
-- [ ] PGN import/export
-- [ ] Themes and customization
-
----
-
-## 📊 Performance
+## Performance
 
 - **Move Generation**: ~10M nodes/second
 - **Search Depth**: 6-8 ply in middlegame
 - **Transposition Table**: 95%+ hit rate
-- **Memory Usage**: ~50MB typical
-- **Response Time**: <100ms for most positions
+- **API Response**: <100ms typical
+- **Memory Usage**: ~50MB
 
 ---
 
-## 📄 License
+## Known Limitations
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+ChessQ is transparent about current limitations:
+
+- ❌ **No Real-time Multiplayer**: WebSocket implementation planned
+- ❌ **Local Storage Only**: Server-side profiles not yet implemented
+- ❌ **Economy System**: Frontend simulation only (not real money)
+- ❌ **4-Player Chess**: UI exists but logic not implemented
+
+See [ROADMAP.md](ROADMAP.md) for planned features and implementation timeline.
 
 ---
 
-## 🙏 Acknowledgments
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Ways to Contribute
+
+- 🐛 Report bugs
+- 💡 Suggest features
+- 📝 Improve documentation
+- 🔧 Submit pull requests
+- ⭐ Star the repository
+
+---
+
+## License
+
+This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+## Acknowledgments
 
 - Chess programming community for algorithms and techniques
-- Rust community for excellent tooling and libraries
+- Rust community for excellent tooling
 - Contributors and testers
 
 ---
 
-## 📞 Contact
+## Contact
 
-- **GitHub**: [@aidolphin](https://github.com/aidolphin)
-- **Repository**: [chessQ](https://github.com/aidolphin/chessQ)
+- **Repository**: [github.com/aidolphin/chessQ](https://github.com/aidolphin/chessQ)
 - **Issues**: [Report a bug](https://github.com/aidolphin/chessQ/issues)
 
 ---

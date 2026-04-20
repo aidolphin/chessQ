@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChessQ - Admin Control Panel</title>
+  <link rel="stylesheet" href="./play.css">
+  <style>
+    body { background: var(--black-primary); font-family: -apple-system, sans-serif; }
+    .admin-container { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
+    .admin-sidebar { background: var(--black-secondary); padding: 20px; border-right: 1px solid rgba(16, 185, 129, 0.2); }
+    .admin-main { padding: 40px; }
+    .admin-card { background: var(--black-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); }
+    .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; color: var(--text-primary); }
+    .admin-table th, .admin-table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .admin-table th { color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; }
+    .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+    .status-active { background: rgba(16, 185, 129, 0.2); color: var(--green-neon); }
+    .status-banned { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <div class="admin-sidebar">
+      <h2 style="color: var(--green-neon); margin-bottom: 30px;">ChessQ Admin</h2>
+      <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 15px;">
+        <li><a href="#" style="color: white; text-decoration: none; font-weight: bold;">📊 Dashboard</a></li>
+        <li><a href="#" style="color: var(--text-secondary); text-decoration: none;">👥 User Management</a></li>
+        <li><a href="#" style="color: var(--text-secondary); text-decoration: none;">💰 Economy & Payouts</a></li>
+        <li><a href="#" style="color: var(--text-secondary); text-decoration: none;">📝 Content CMS</a></li>
+        <li><a href="#" style="color: var(--text-secondary); text-decoration: none;">🏆 Tournaments</a></li>
+        <li><a href="./play.html" style="color: var(--text-muted); text-decoration: none; margin-top: 40px; display: inline-block;">← Back to Game</a></li>
+      </ul>
+    </div>
+    
+    <div class="admin-main">
+      <h1 style="margin-bottom: 10px;">Platform Overview</h1>
+      <p style="color: var(--text-secondary); margin-bottom: 30px;">Manage users, content, and platform economy.</p>
+      
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+        <div class="admin-card">
+          <h3 style="color: var(--text-secondary); font-size: 0.9rem;">Total Revenue (MRR)</h3>
+          <h2 style="font-size: 2rem; margin-top: 10px;">$12,450.00</h2>
+        </div>
+        <div class="admin-card">
+          <h3 style="color: var(--text-secondary); font-size: 0.9rem;">Active Subscriptions</h3>
+          <h2 style="font-size: 2rem; margin-top: 10px;">1,842 <span style="color: var(--green-neon); font-size: 1rem;">+12%</span></h2>
+        </div>
+        <div class="admin-card">
+          <h3 style="color: var(--text-secondary); font-size: 0.9rem;">Pending Payouts</h3>
+          <h2 style="font-size: 2rem; margin-top: 10px; color: #ef4444;">$340.50</h2>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h2>Recent Users</h2>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Plan</th>
+              <th>Country</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GrandMaster_Alex</td>
+              <td>Pro Tier</td>
+              <td>US</td>
+              <td><span class="status-badge status-active">Active</span></td>
+              <td><button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">Edit</button></td>
+            </tr>
+            <tr>
+              <td>ZenKnight</td>
+              <td>Free</td>
+              <td>NP</td>
+              <td><span class="status-badge status-active">Active</span></td>
+              <td><button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">Edit</button></td>
+            </tr>
+            <tr>
+              <td>SpamBot99</td>
+              <td>Free</td>
+              <td>RU</td>
+              <td><span class="status-badge status-banned">Banned</span></td>
+              <td><button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">Unban</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="admin-card">
+        <h2>Content CMS (News Announcements)</h2>
+        <input type="text" placeholder="Announcement Title" style="width: 100%; padding: 10px; margin: 15px 0; background: var(--black-secondary); border: 1px solid var(--text-muted); color: white; border-radius: 4px;">
+        <textarea placeholder="Write the news content here..." rows="4" style="width: 100%; padding: 10px; background: var(--black-secondary); border: 1px solid var(--text-muted); color: white; border-radius: 4px;"></textarea>
+        <button class="btn-primary" style="margin-top: 15px;">Publish to All Users</button>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

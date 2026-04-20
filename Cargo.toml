@@ -23,6 +23,6 @@ ureq = { version = "2.10", features = ["json", "tls"] }
 criterion = "0.5"
 
 [[bench]]
-name = "move_gen_beanch"
+name = "move_gen_bench"
 harness = false
-path = "beanches/move_gen_beanch.rs"
+path = "benches/move_gen_bench.rs"

@@ -21,11 +21,15 @@
       </a>
       
       <div class="nav-links">
-        <a href="/" class="nav-link">Home</a>
-        <a href="/play.html" class="nav-link">Play</a>
+        <a href="/" class="nav-link" data-i18n="home">Home</a>
+        <a href="/play.html" class="nav-link" data-i18n="play">Play</a>
       </div>
       
       <div class="nav-actions">
+        <button class="btn-text" id="langToggleBtn" style="background:none;border:none;color:var(--text-primary);cursor:pointer;font-weight:bold;margin-right:8px;">🇳🇵 NE</button>
+        <button class="btn-primary-small" id="modeToggleBtn" style="background:var(--green-neon);color:var(--black-primary);border:none;padding:4px 12px;border-radius:4px;font-weight:bold;cursor:pointer;margin-right:12px;">Kids Mode</button>
+        <button class="btn-primary-small" id="upgradeBtn" style="background:linear-gradient(45deg, #FFD700, #FFA500);color:#000;border:none;padding:4px 12px;border-radius:4px;font-weight:bold;cursor:pointer;margin-right:12px;">Upgrade</button>
+        
         <button class="btn-icon" id="notificationBtn" aria-label="Notifications">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path d="M10 2C7.8 2 6 3.8 6 6V9L4 11V13H16V11L14 9V6C14 3.8 12.2 2 10 2Z" stroke="currentColor" stroke-width="1.5"/>
@@ -105,6 +109,26 @@
           </div>
         </div>
       </div>
+
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">Scheduled Tournaments</h3>
+        <div class="tournaments-list" id="tournamentsList">
+          <div class="friend-item online" style="border-left: 3px solid #FFD700;">
+            <div class="friend-info" style="margin-left: 8px;">
+              <div class="friend-name">Kathmandu Blitz Cup</div>
+              <div class="friend-status">Starts in 45 mins • $500 Prize</div>
+            </div>
+            <button class="btn-challenge" style="font-size: 0.8rem; padding: 4px;">Join</button>
+          </div>
+          <div class="friend-item offline">
+            <div class="friend-info" style="margin-left: 8px;">
+              <div class="friend-name">Beginner Arena</div>
+              <div class="friend-status">Tomorrow • Free Entry</div>
+            </div>
+            <button class="btn-challenge" style="font-size: 0.8rem; padding: 4px;">Register</button>
+          </div>
+        </div>
+      </div>
     </aside>
 
     <!-- Center - Game Board Area -->
@@ -113,8 +137,8 @@
       <!-- Game Mode Selection (Initial State) -->
       <div class="mode-selection" id="modeSelection">
         <div class="mode-header">
-          <h1>Choose Your Game</h1>
-          <p>Select a game mode to start playing</p>
+          <h1 data-i18n="choose_game">Choose Your Game</h1>
+          <p data-i18n="select_game">Select a game mode to start playing</p>
         </div>
         
         <div class="mode-grid">
@@ -126,9 +150,9 @@
                 <path d="M8 16H40M8 24H40M8 32H40M16 8V40M24 8V40M32 8V40" stroke="currentColor" stroke-width="1"/>
               </svg>
             </div>
-            <h3>Standard Chess</h3>
+            <h3 data-i18n="standard_chess">Standard Chess</h3>
             <p>Classic 2-player chess with time controls</p>
-            <button class="btn-mode">Play Now</button>
+            <button class="btn-mode" data-i18n="play_now">Play Now</button>
           </div>
           
           <!-- 4-Player Chess -->
@@ -152,9 +176,9 @@
                 <path d="M24 14V24L30 28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               </svg>
             </div>
-            <h3>Learning Mode</h3>
+            <h3 data-i18n="learning_mode">Learning Mode</h3>
             <p>Tutorials, piece guides, and practice</p>
-            <button class="btn-mode">Start Learning</button>
+            <button class="btn-mode" data-i18n="start_learning">Start Learning</button>
           </div>
           
           <!-- Custom Challenge -->
@@ -176,7 +200,7 @@
         <div class="modal-overlay" id="timeControlOverlay"></div>
         <div class="modal-content time-modal-large">
           <div class="modal-header">
-            <h2>Select Time Control</h2>
+            <h2 data-i18n="select_time_control">Select Time Control</h2>
             <button class="modal-close" id="closeTimeControl">&times;</button>
           </div>
           
@@ -261,7 +285,7 @@
           <div class="time-modal-footer">
             <button class="btn-start-game" id="startGameBtn" disabled>
               <span class="btn-icon">🎮</span>
-              <span class="btn-text">Start Game</span>
+              <span class="btn-text" data-i18n="start_game">Start Game</span>
             </button>
           </div>
         </div>
@@ -272,15 +296,15 @@
         <div class="modal-overlay" id="opponentOverlay"></div>
         <div class="modal-content">
           <div class="modal-header">
-            <h2>Choose Your Opponent</h2>
+            <h2 data-i18n="choose_opponent">Choose Your Opponent</h2>
             <button class="modal-close" id="closeOpponent">&times;</button>
           </div>
           
           <div class="opponent-selection">
             <button class="opponent-card" data-opponent="ai">
               <div class="opponent-icon">🤖</div>
-              <h3>Play Against AI</h3>
-              <p>Challenge our intelligent chess bot</p>
+              <h3 data-i18n="play_ai">Play Against AI</h3>
+              <p data-i18n="challenge_ai">Challenge our intelligent chess bot</p>
               <div class="opponent-features">
                 <span>✓ Adjustable difficulty</span>
                 <span>✓ Instant moves</span>
@@ -290,8 +314,8 @@
             
             <button class="opponent-card" data-opponent="human">
               <div class="opponent-icon">👤</div>
-              <h3>Play Against Human</h3>
-              <p>Challenge a friend or online player</p>
+              <h3 data-i18n="play_human">Play Against Human</h3>
+              <p data-i18n="challenge_human">Challenge a friend or online player</p>
               <div class="opponent-features">
                 <span>✓ Real competition</span>
                 <span>✓ Chat enabled</span>
@@ -307,31 +331,51 @@
         <div class="modal-overlay" id="colorOverlay"></div>
         <div class="modal-content">
           <div class="modal-header">
-            <h2>Choose Your Color</h2>
+            <h2 data-i18n="choose_color">Choose Your Color</h2>
             <button class="modal-close" id="closeColor">&times;</button>
           </div>
           
           <div class="color-selection">
             <button class="color-card" data-color="w">
               <div class="color-icon">♔</div>
-              <h3>Play as White</h3>
+              <h3 data-i18n="play_white">Play as White</h3>
               <p>You move first</p>
               <div class="color-advantage">First move advantage</div>
             </button>
             
             <button class="color-card" data-color="b">
               <div class="color-icon">♚</div>
-              <h3>Play as Black</h3>
+              <h3 data-i18n="play_black">Play as Black</h3>
               <p>AI moves first</p>
               <div class="color-advantage">Reactive strategy</div>
             </button>
             
             <button class="color-card" data-color="random">
               <div class="color-icon">🎲</div>
-              <h3>Random</h3>
+              <h3 data-i18n="random_color">Random</h3>
               <p>Let fate decide</p>
               <div class="color-advantage">Surprise me!</div>
             </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Multiplayer Lobby Modal -->
+      <div class="lobby-modal hidden" id="lobbyModal">
+        <div class="modal-overlay" id="lobbyOverlay"></div>
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 data-i18n="waiting_opponent">Waiting for Opponent</h2>
+            <button class="modal-close" id="closeLobby">&times;</button>
+          </div>
+          <div class="lobby-content" style="text-align:center; padding: 20px;">
+            <p data-i18n="share_invite">Share this link to invite a friend:</p>
+            <div class="share-link-box" style="margin: 20px 0;">
+              <input type="text" id="lobbyShareLink" value="https://chessq.com/play?id=room_99" readonly style="width:80%; padding:8px;">
+              <button class="btn-copy" id="lobbyCopyLink">Copy</button>
+            </div>
+            <div class="spinner" style="margin: 20px auto; width: 40px; height: 40px; border: 4px solid var(--green-emerald); border-top: 4px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <p style="color:var(--green-neon);" data-i18n="waiting_join">Waiting for someone to join...</p>
           </div>
         </div>
       </div>
@@ -388,6 +432,10 @@
 
         <!-- Game Controls -->
         <div class="game-controls">
+          <button class="control-btn" id="backToMenuBtn" title="Back to Menu" style="background:var(--green-neon);color:var(--black-primary);border-radius:4px;padding:4px 8px;font-weight:bold;margin-right:auto;">
+            ← Back
+          </button>
+          
           <button class="control-btn" id="resignBtn" title="Resign">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M4 4L16 16M16 4L4 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -467,6 +515,16 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- Email Subscription Community -->
+      <div class="email-sub-banner" style="background: var(--black-secondary); padding: 20px; border-radius: 8px; margin-top: 40px; text-align: center; border: 1px solid rgba(16, 185, 129, 0.2);">
+        <h3>Join the ChessQ Community</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 15px;">Get weekly puzzles, tournament alerts, and strategy guides.</p>
+        <div style="display: flex; justify-content: center; gap: 10px;">
+          <input type="email" placeholder="Enter your email" style="padding: 10px; border-radius: 4px; border: 1px solid var(--text-muted); background: var(--black-tertiary); color: white; width: 250px;">
+          <button class="btn-primary" style="padding: 10px 20px;">Subscribe</button>
+        </div>
       </div>
 
     </main>
@@ -720,11 +778,142 @@
         <div class="result-actions">
           <button class="btn-primary" id="playAgainBtn">Play Again</button>
           <button class="btn-secondary" id="viewAnalysisBtn">View Analysis</button>
+          <button class="btn-mode" id="deepReviewBtn" style="border: 1px solid var(--green-neon); color: var(--green-neon); width: 100%; margin-top: 10px;">Deep Review (Pro)</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Authentication Modal (Login/Register) -->
+  <div class="auth-modal hidden" id="authModal">
+    <div class="modal-overlay" id="authOverlay"></div>
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h2>Sign In / Register</h2>
+        <button class="modal-close" id="closeAuth">&times;</button>
+      </div>
+      <div class="auth-content" style="padding: 20px 0;">
+        <div class="form-group" style="margin-bottom: 15px;">
+          <label style="display:block; margin-bottom:5px;">Email Address</label>
+          <input type="email" placeholder="you@example.com" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--black-tertiary); border: 1px solid var(--text-muted); color: white;">
+        </div>
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label style="display:block; margin-bottom:5px;">Password</label>
+          <input type="password" placeholder="••••••••" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--black-tertiary); border: 1px solid var(--text-muted); color: white;">
+        </div>
+        <button class="btn-primary" style="width: 100%; padding: 12px; margin-bottom: 15px;">Continue securely</button>
+        <div style="text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+          By continuing, you agree to our <a href="#" style="color: var(--green-neon);">Terms of Service</a> and <a href="#" style="color: var(--green-neon);">Privacy Policy</a>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pricing / Subscription Modal -->
+  <div class="pricing-modal hidden" id="pricingModal">
+    <div class="modal-overlay" id="pricingOverlay"></div>
+    <div class="modal-content time-modal-large" style="max-width: 900px;">
+      <div class="modal-header">
+        <h2>Choose Your Plan</h2>
+        <button class="modal-close" id="closePricing">&times;</button>
+      </div>
+      <div class="pricing-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 20px 0;">
+        
+        <div class="pricing-card" style="background: var(--black-secondary); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); text-align: center;">
+          <h3>Free Tier</h3>
+          <h2 style="font-size: 2rem; margin: 15px 0;">$0<span style="font-size:1rem; color:var(--text-muted);">/mo</span></h2>
+          <ul style="list-style: none; padding: 0; text-align: left; color: var(--text-secondary); line-height: 1.8; margin-bottom: 20px;">
+            <li>✓ Basic AI Opponent</li>
+            <li>✓ Ad-supported</li>
+            <li>✗ No Tournaments</li>
+            <li>✗ No Deep Game Review</li>
+          </ul>
+          <button class="btn-mode" style="width: 100%; border: 1px solid var(--text-muted); background: transparent; color: white;">Current Plan</button>
+        </div>
+
+        <div class="pricing-card" style="background: var(--black-secondary); padding: 20px; border-radius: 8px; border: 2px solid var(--green-neon); text-align: center; transform: scale(1.05);">
+          <div style="background: var(--green-neon); color: var(--black-primary); font-size: 0.8rem; font-weight: bold; padding: 4px; border-radius: 4px; display: inline-block; margin-bottom: 10px;">MOST POPULAR</div>
+          <h3>Premium Tier</h3>
+          <h2 style="font-size: 2rem; margin: 15px 0;">$4.99<span style="font-size:1rem; color:var(--text-muted);">/mo</span></h2>
+          <ul style="list-style: none; padding: 0; text-align: left; color: var(--text-secondary); line-height: 1.8; margin-bottom: 20px;">
+            <li>✓ Advanced AI Profiles</li>
+            <li>✓ Ad-free Experience</li>
+            <li>✓ Access to Tournaments</li>
+            <li>✓ Deep Game Review</li>
+          </ul>
+          <button class="btn-primary" id="payPremiumBtn" style="width: 100%;">Pay via Stripe / Khalti</button>
+        </div>
+
+        <div class="pricing-card" style="background: var(--black-secondary); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); text-align: center;">
+          <h3>Pro Tier</h3>
+          <h2 style="font-size: 2rem; margin: 15px 0;">$9.99<span style="font-size:1rem; color:var(--text-muted);">/mo</span></h2>
+          <ul style="list-style: none; padding: 0; text-align: left; color: var(--text-secondary); line-height: 1.8; margin-bottom: 20px;">
+            <li>✓ Everything in Premium</li>
+            <li>✓ GM Masterclass Access</li>
+            <li>✓ Priority Tournament Seeding</li>
+            <li>✓ 2x Economy Earnings</li>
+          </ul>
+          <button class="btn-mode" id="payProBtn" style="width: 100%;">Pay via Stripe / Khalti</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Simulated Checkout Modal -->
+  <div class="checkout-modal hidden" id="checkoutModal">
+    <div class="modal-overlay" id="checkoutOverlay"></div>
+    <div class="modal-content" style="max-width: 450px;">
+      <div class="modal-header">
+        <h2>Secure Checkout</h2>
+        <button class="modal-close" id="closeCheckout">&times;</button>
+      </div>
+      <div class="checkout-content" style="padding: 20px 0;">
+        <div style="background: var(--black-secondary); padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid rgba(16, 185, 129, 0.2);">
+          <h3 id="checkoutPlanName">Premium Tier</h3>
+          <p style="color: var(--text-secondary);" id="checkoutPlanPrice">$4.99/mo</p>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 15px;">
+          <label style="display:block; margin-bottom:5px;">Card Information</label>
+          <input type="text" placeholder="Card Number (Mock)" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--black-tertiary); border: 1px solid var(--text-muted); color: white; margin-bottom: 10px;">
+          <div style="display: flex; gap: 10px;">
+            <input type="text" placeholder="MM/YY" style="width: 50%; padding: 10px; border-radius: 4px; background: var(--black-tertiary); border: 1px solid var(--text-muted); color: white;">
+            <input type="text" placeholder="CVC" style="width: 50%; padding: 10px; border-radius: 4px; background: var(--black-tertiary); border: 1px solid var(--text-muted); color: white;">
+          </div>
+        </div>
+        
+        <button class="btn-primary" id="completePaymentBtn" style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; gap: 10px;">
+          <span id="paymentBtnText">Complete Payment</span>
+          <div id="paymentSpinner" class="spinner hidden" style="width: 20px; height: 20px; border: 2px solid white; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incoming Challenge Modal -->
+  <div class="challenge-modal hidden" id="challengeModal" style="position: fixed; top: 20px; right: 20px; z-index: 1000; background: var(--black-secondary); border: 2px solid var(--green-neon); padding: 15px 25px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: slideInRight 0.5s ease;">
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+      <div style="width: 40px; height: 40px; background: var(--green-emerald); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--black-primary);">GM</div>
+      <div>
+        <h4 style="margin: 0; color: white;" id="challengeName">GrandMaster_Alex</h4>
+        <span style="font-size: 0.8rem; color: var(--green-neon);">Sent you a challenge (Blitz 5|0)</span>
+      </div>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn-primary" id="acceptChallengeBtn" style="flex: 1; padding: 8px;">Accept</button>
+      <button class="btn-secondary" id="declineChallengeBtn" style="flex: 1; padding: 8px;">Decline</button>
+    </div>
+  </div>
+
+  <style>
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  </style>
+
+  <script src="./locales.js"></script>
   <script src="./play.js"></script>
   <script src="./learn.js"></script>
 </body>

@@ -98,16 +98,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned Features
+
+See [ROADMAP.md](ROADMAP.md) for detailed implementation plans.
+
+**Phase 1 (v0.2.0):**
+- [ ] PGN import/export
+- [ ] Opening book integration
+- [ ] Enhanced position evaluation
+
+**Phase 2 (v0.3.0):**
 - [ ] WebSocket-based real-time multiplayer
-- [ ] Server-side user authentication
+- [ ] Matchmaking system
+- [ ] Server-side time control
+
+**Phase 3 (v0.4.0):**
+- [ ] User authentication (email/password)
+- [ ] Persistent user profiles
+- [ ] Server-side ELO rating system
+- [ ] Game history database
+
+**Phase 4 (v0.5.0):**
 - [ ] Tournament system
 - [ ] Puzzle database
-- [ ] Opening book
 - [ ] Game analysis with engine evaluation
-- [ ] PGN import/export
-- [ ] Themes and customization
 - [ ] 4-player chess mode
+
+**Phase 5 (v1.0.0):**
 - [ ] Mobile apps (iOS/Android)
+- [ ] Advanced UI customization
+- [ ] Social features (friends, clubs)
+- [ ] Themes and piece sets
 
 ### Known Limitations
 - Multiplayer is local only (no WebSocket sync)
